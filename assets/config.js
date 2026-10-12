@@ -1,7 +1,7 @@
 // Recharge — public config (publishable key is safe in the browser; data is protected by RLS)
 window.RC = {
-  url: 'https://mlncwxzugxjulxxuhmsd.supabase.co',
-  key: 'sb_publishable_RtZHLhzm4qLWYbIGIU54Eg_Schs3Nxy',
+  url: 'https://jfcwstqckaebteglgzny.supabase.co',
+  key: 'sb_publishable__3yLhn3CWDr6oP7GcPZAxQ_NQY3oBHw',
   bucket: 'shop-images',
   currency: 'ج.م',
   categories: { men: 'رجالي', women: 'حريمي', unisex: 'للجنسين' },
