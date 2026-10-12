@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Sitemap: https://rechargewatches.github.io/Recharge-watches-/sitemap.xml
