@@ -73,6 +73,11 @@ header.top.scrolled{border-color:var(--line)}
 .dial{position:relative;aspect-ratio:1;max-width:440px;justify-self:center;width:100%;margin-bottom:40px}
 .dial .m{color:var(--ink);filter:drop-shadow(0 0 40px var(--glow))}
 .dial .rc-sec{transform-origin:100px 100px;animation:tick 60s steps(60) infinite}
+.dial .rc-wall .wc-h,.dial .rc-wall .wc-m,.dial .rc-wall .wc-s{transform-origin:100px 100px}
+.dial .rc-wall.ready .wc-s{transition:transform .25s cubic-bezier(.4,2.2,.6,1)}
+.dial .rc-wall.ready .wc-m,.dial .rc-wall.ready .wc-h{transition:transform .6s ease}
+.dial .rc-wall .wc-re{opacity:.16}
+@media (prefers-reduced-motion:reduce){.dial .rc-wall .wc-s,.dial .rc-wall .wc-m,.dial .rc-wall .wc-h{transition:none!important}}
 @keyframes tick{to{transform:rotate(360deg)}}
 .dial .ring{position:absolute;inset:-6%;border:1px dashed var(--line-2);border-radius:50%;animation:spin 120s linear infinite}
 @keyframes spin{to{transform:rotate(-360deg)}}
@@ -324,23 +329,41 @@ const FALLBACK = 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="ht
 let products = [], settings = {}, filter = 'all', sort = 'featured';
 let cart = []; try { cart = JSON.parse(localStorage.getItem('rc-cart') || '[]') } catch(e) {}
 
-$('#hdrLogo').innerHTML = RC.logo(); $('#heroLogo').innerHTML = RC.logo(); $('#ftLogo').innerHTML = RC.logo();
+$('#hdrLogo').innerHTML = RC.logo(); $('#ftLogo').innerHTML = RC.logo();
+// hero: a working wall clock — the RE mark sits on the dial, real hands turn over it
+$('#heroLogo').innerHTML = `<svg class="rc-mark rc-wall" viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <circle cx="100" cy="100" r="88" stroke-width="2"/>
+  <g stroke-width="3"><line x1="100" y1="14" x2="100" y2="24"/><line x1="100" y1="176" x2="100" y2="186"/><line x1="14" y1="100" x2="24" y2="100"/><line x1="176" y1="100" x2="186" y2="100"/></g>
+  <g stroke-width="1.8"><line x1="143" y1="25.5" x2="139" y2="32.4"/><line x1="174.5" y1="57" x2="167.6" y2="61"/><line x1="174.5" y1="143" x2="167.6" y2="139"/><line x1="143" y1="174.5" x2="139" y2="167.6"/><line x1="57" y1="174.5" x2="61" y2="167.6"/><line x1="25.5" y1="143" x2="32.4" y2="139"/><line x1="25.5" y1="57" x2="32.4" y2="61"/><line x1="57" y1="25.5" x2="61" y2="32.4"/></g>
+  <g class="wc-re" transform="translate(100 100) scale(1.15) translate(-128.5 -71.5)" stroke-width="3">
+    <path d="M100 103 V40"/><path d="M100 40 H111 A15 15 0 0 1 111 70 H100"/><path d="M108 70 L134 100"/>
+    <path d="M134 100 V40 H157 M134 70 H153 M134 100 H157"/>
+  </g>
+  <g class="wc-h"><line x1="100" y1="110" x2="100" y2="54" stroke-width="6"/></g>
+  <g class="wc-m"><line x1="100" y1="113" x2="100" y2="28" stroke-width="3.8"/></g>
+  <g class="wc-s"><line x1="100" y1="122" x2="100" y2="22" stroke="var(--amber, #b07a3a)" stroke-width="1.8"/><circle cx="100" cy="120" r="3.2" fill="var(--amber, #b07a3a)" stroke="none"/></g>
+  <circle cx="100" cy="100" r="5.5" fill="currentColor" stroke="none"/><circle cx="100" cy="100" r="2.2" fill="var(--amber, #b07a3a)" stroke="none"/>
+</svg>`;
 $('#yr').textContent = new Date().getFullYear();
 
-// live clock + sync second hand to real time
+// live clock: hour, minute and second hands show the real local time
 (function clock(){
-  const sec = document.querySelector('#heroLogo .rc-sec');
-  // base drawing points to ~240deg (8 o'clock). rotate so it shows real seconds.
+  const svg = document.querySelector('#heroLogo .rc-wall'); if (!svg) return;
+  const h = svg.querySelector('.wc-h'), m = svg.querySelector('.wc-m'), sc = svg.querySelector('.wc-s');
+  const set = (el, deg) => { el.style.transform = `rotate(${deg}deg)`; };
+  const t0 = Date.now() - new Date().getMilliseconds(), n0 = new Date(t0), base = n0.getHours() * 3600 + n0.getMinutes() * 60 + n0.getSeconds();
   const tick = () => {
     const d = new Date();
     $('#clock').textContent = d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    // monotonic angle (never spins backwards); 240 = drawn angle of the hand, clockwise from 12
-    const total = (Math.floor(d.getTime() / 1000) % 86400) * 6 - 240;
-    sec.style.animation = 'none';
-    sec.style.transition = 'transform .25s cubic-bezier(.4,2.2,.6,1)';
-    sec.style.transform = `rotate(${total}deg)`;
+    // seconds since today's local midnight at load, then counted up — angles only grow, so no hand swings backwards
+    const t = base + Math.floor((d.getTime() - t0) / 1000);
+    set(sc, t * 6);              // 6° a second
+    set(m, t * 0.1);             // 6° a minute
+    set(h, t / 120);             // 30° an hour
   };
-  tick(); setInterval(tick, 1000);
+  tick();
+  requestAnimationFrame(() => svg.classList.add('ready'));
+  setInterval(tick, 1000);
 })();
 
 function toast(msg, type='') { const t = document.createElement('div'); t.className = 'toast ' + type; t.textContent = msg; $('#toasts').appendChild(t); setTimeout(() => { t.style.transition='opacity .3s'; t.style.opacity = 0; setTimeout(() => t.remove(), 300) }, 2800); }
