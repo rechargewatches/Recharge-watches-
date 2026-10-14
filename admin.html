@@ -560,5 +560,34 @@ function renderSettings() {
 
 boot();
 </script>
+<style>
+.pw-wrap{position:relative;display:block}
+.pw-wrap input{width:100%;padding-inline-end:46px !important;box-sizing:border-box}
+.pw-eye{position:absolute;top:50%;inset-inline-end:6px;transform:translateY(-50%);width:36px;height:36px;display:grid;place-items:center;border:0;background:transparent;color:inherit;opacity:.6;cursor:pointer;border-radius:8px}
+.pw-eye:hover,.pw-eye:focus-visible{opacity:1}
+.pw-eye svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pw-eye .off{display:none}.pw-eye.on .on{display:none}.pw-eye.on .off{display:block}
+</style>
+<script>
+// show / hide password on every password field (including ones added later)
+(function(){
+  var ICON='<svg class="on" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="off" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 5.1A10.9 10.9 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6A17.4 17.4 0 0 0 2 12s3.5 7 10 7a9.8 9.8 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
+  function add(inp){
+    if(inp.dataset.eye) return; inp.dataset.eye='1';
+    var w=document.createElement('span'); w.className='pw-wrap';
+    inp.parentNode.insertBefore(w,inp); w.appendChild(inp);
+    var b=document.createElement('button'); b.type='button'; b.className='pw-eye'; b.innerHTML=ICON;
+    b.setAttribute('aria-label','Show password'); b.title='Show password';
+    b.addEventListener('click',function(){
+      var show=inp.type==='password'; inp.type=show?'text':'password';
+      b.classList.toggle('on',show); b.setAttribute('aria-label',show?'Hide password':'Show password'); b.title=b.getAttribute('aria-label');
+      inp.focus({preventScroll:true});
+    });
+    w.appendChild(b);
+  }
+  function scan(){ document.querySelectorAll('input[type=password]:not([data-eye])').forEach(add); }
+  scan(); new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
+})();
+</script>
 </body>
 </html>
