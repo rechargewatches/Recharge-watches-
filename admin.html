@@ -168,6 +168,11 @@ main{flex:1;min-width:0;padding:28px 32px 60px}
 @media (max-height:520px) and (orientation:landscape){ .mob-tabs .tab{height:44px;flex-direction:row;gap:6px} .chart-box{height:200px} }
 @media (min-width:1800px){ html{zoom:1.2} }
 @media (min-width:2400px){ html{zoom:1.5} }
+.link-btn{background:none;border:0;color:var(--muted);font:inherit;font-size:13px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:4px;align-self:center}
+.link-btn:hover{color:var(--ink)}
+.auth-note{font-size:13px;line-height:1.7;color:var(--muted);background:rgba(176,122,58,.1);border:1px solid rgba(176,122,58,.35);border-radius:12px;padding:12px 14px;text-align:center}
+#forgotForm,#resetForm{display:flex;flex-direction:column;gap:14px}
+#forgotForm.hidden,#resetForm.hidden,#loginForm.hidden{display:none}
 </style>
 </head>
 <body>
@@ -180,7 +185,25 @@ main{flex:1;min-width:0;padding:28px 32px 60px}
     <div class="field"><label for="em">الإيميل</label><input class="input en" id="em" type="email" autocomplete="username" required dir="ltr"></div>
     <div class="field"><label for="pw">الباسورد</label><input class="input en" id="pw" type="password" autocomplete="current-password" required dir="ltr"></div>
     <button class="btn btn-primary" id="loginBtn" type="submit">دخول</button>
+    <button type="button" class="link-btn" id="forgotLink">نسيت الباسورد؟</button>
     <a href="./" style="text-align:center;color:var(--muted);font-size:13px">← رجوع للمتجر</a>
+  </form>
+  <form id="forgotForm" class="hidden" autocomplete="on">
+    <div class="m" id="forgotLogo"></div>
+    <h1 class="en">RECHARGE WATCHES</h1>
+    <p>اكتب إيميل الأدمن وهيوصلك لينك تعمل منه باسورد جديد</p>
+    <div class="field"><label for="fem">الإيميل</label><input class="input en" id="fem" type="email" autocomplete="username" required dir="ltr"></div>
+    <button class="btn btn-primary" id="forgotBtn" type="submit">ابعت لينك الاسترجاع</button>
+    <div class="auth-note hidden" id="forgotDone">لو الإيميل ده عليه حساب أدمن، هيوصله لينك خلال دقيقة. افتحه من نفس الجهاز، ولو مالقيتهوش بص في الـ Spam.</div>
+    <button type="button" class="link-btn" id="backToLogin">← رجوع لتسجيل الدخول</button>
+  </form>
+  <form id="resetForm" class="hidden" autocomplete="on">
+    <div class="m" id="resetLogo"></div>
+    <h1 class="en">RECHARGE WATCHES</h1>
+    <p>اكتب الباسورد الجديد</p>
+    <div class="field"><label for="npw">الباسورد الجديد (8 حروف على الأقل)</label><input class="input en" id="npw" type="password" minlength="8" autocomplete="new-password" required dir="ltr"></div>
+    <div class="field"><label for="npw2">تأكيد الباسورد</label><input class="input en" id="npw2" type="password" minlength="8" autocomplete="new-password" required dir="ltr"></div>
+    <button class="btn btn-primary" id="resetBtn" type="submit">حفظ الباسورد والدخول</button>
   </form>
 </section>
 
@@ -209,7 +232,10 @@ main{flex:1;min-width:0;padding:28px 32px 60px}
 <script src="assets/config.js?v=1791800786"></script>
 <script>
 const {money, finalPrice, discountPct, esc, categories, statuses} = RC;
+// read this before the client consumes the link: a password-recovery link lands here with type=recovery
+let RECOVERY = /(^|[#&?])type=recovery(&|$)/.test(location.hash + location.search);
 const sb = supabase.createClient(RC.url, RC.key);
+sb.auth.onAuthStateChange(ev => { if (ev === 'PASSWORD_RECOVERY') { RECOVERY = true; showReset(); } });
 const $ = s => document.querySelector(s);
 const STATUS_KEYS = Object.keys(statuses);
 const ICONS = {
@@ -222,7 +248,7 @@ const TABS = [['dash','المبيعات'],['orders','الطلبات'],['products
 let tab = 'dash', range = 30, orderFilter = 'all', orderQuery = '', openOrders = new Set();
 let products = [], orders = [], settings = {}, chart = null, channel = null, freshIds = new Set();
 
-['#loginLogo','#sideLogo'].forEach(s => $(s).innerHTML = RC.logo());
+['#loginLogo','#sideLogo','#forgotLogo','#resetLogo'].forEach(s => $(s).innerHTML = RC.logo());
 function toast(msg, type='') { const t = document.createElement('div'); t.className = 'toast ' + type; t.textContent = msg; $('#toasts').appendChild(t); setTimeout(() => { t.style.transition='opacity .3s'; t.style.opacity = 0; setTimeout(() => t.remove(), 300) }, 3000); }
 function confirmBox(msg, okText='تأكيد') { return new Promise(res => { const d = document.createElement('div'); d.className = 'confirm'; d.innerHTML = `<div class="box"><b>${esc(msg)}</b><div class="acts"><button class="btn btn-danger btn-sm" data-ok>${esc(okText)}</button><button class="btn btn-ghost btn-sm" data-no>إلغاء</button></div></div>`; document.body.appendChild(d); d.onclick = e => { if (e.target.closest('[data-ok]')) { d.remove(); res(true) } else if (e.target.closest('[data-no]') || e.target === d) { d.remove(); res(false) } }; }); }
 const fmtDate = d => new Date(d).toLocaleString('ar-EG', {day:'numeric', month:'short', hour:'numeric', minute:'2-digit'});
@@ -232,12 +258,37 @@ $('#themeBtn').onclick = () => { const h = document.documentElement; h.dataset.t
 async function boot() {
   const {data:{session}} = await sb.auth.getSession();
   if (!session) return showLogin();
+  if (RECOVERY) return showReset();
   const {data: ok, error} = await sb.rpc('shop_is_admin');
   if (error || !ok) { await sb.auth.signOut(); toast('الحساب ده مش أدمن', 'err'); return showLogin(); }
   $('#loginView').classList.add('hidden'); $('#appView').classList.remove('hidden');
   await loadAll(); renderTabs(); go(location.hash.slice(1) || 'dash'); listen();
 }
-function showLogin() { $('#appView').classList.add('hidden'); $('#loginView').classList.remove('hidden'); setTimeout(() => $('#em').focus(), 50); }
+function authPanel(id) { ['#loginForm','#forgotForm','#resetForm'].forEach(f => $(f).classList.toggle('hidden', f !== id)); }
+function showLogin() { $('#appView').classList.add('hidden'); $('#loginView').classList.remove('hidden'); authPanel('#loginForm'); setTimeout(() => $('#em').focus(), 50); }
+function showReset() { $('#appView').classList.add('hidden'); $('#loginView').classList.remove('hidden'); authPanel('#resetForm'); setTimeout(() => $('#npw').focus(), 50); }
+$('#forgotLink').onclick = () => { $('#fem').value = $('#em').value; $('#forgotDone').classList.add('hidden'); authPanel('#forgotForm'); setTimeout(() => $('#fem').focus(), 50); };
+$('#backToLogin').onclick = () => authPanel('#loginForm');
+$('#forgotForm').onsubmit = async e => {
+  e.preventDefault(); const b = $('#forgotBtn'); b.disabled = true; b.textContent = 'جاري الإرسال...';
+  const {error} = await sb.auth.resetPasswordForEmail($('#fem').value.trim().toLowerCase(), {redirectTo: location.origin + location.pathname});
+  b.disabled = false; b.textContent = 'ابعت لينك الاسترجاع';
+  if (error && /rate|seconds/i.test(error.message)) return toast('استنى دقيقة قبل ما تطلب لينك تاني', 'err');
+  if (error) return toast('حصلت مشكلة في الإرسال، جرب تاني', 'err');
+  $('#forgotDone').classList.remove('hidden');
+};
+$('#resetForm').onsubmit = async e => {
+  e.preventDefault();
+  const a = $('#npw').value, c = $('#npw2').value;
+  if (a.length < 8) return toast('الباسورد لازم 8 حروف على الأقل', 'err');
+  if (a !== c) return toast('الباسوردين مش زي بعض', 'err');
+  const b = $('#resetBtn'); b.disabled = true; b.textContent = 'جاري الحفظ...';
+  const {error} = await sb.auth.updateUser({password: a});
+  b.disabled = false; b.textContent = 'حفظ الباسورد والدخول';
+  if (error) return toast(/expired|invalid|session/i.test(error.message) ? 'اللينك انتهى، اطلب لينك جديد' : 'ماتحفظش: ' + error.message, 'err');
+  RECOVERY = false; history.replaceState(null, '', location.pathname);
+  toast('اتغير الباسورد ✅', 'ok'); boot();
+};
 $('#loginForm').onsubmit = async e => {
   e.preventDefault(); const b = $('#loginBtn'); b.disabled = true; b.textContent = 'جاري الدخول...';
   const {error} = await sb.auth.signInWithPassword({email: $('#em').value.trim().toLowerCase(), password: $('#pw').value});
