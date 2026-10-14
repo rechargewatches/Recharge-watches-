@@ -626,6 +626,7 @@ boot();
   function add(inp){
     if(inp.dataset.eye) return; inp.dataset.eye='1';
     var w=document.createElement('span'); w.className='pw-wrap';
+    w.dir=getComputedStyle(inp).direction; // eye sits on the same side as the input's own text end
     inp.parentNode.insertBefore(w,inp); w.appendChild(inp);
     var b=document.createElement('button'); b.type='button'; b.className='pw-eye'; b.innerHTML=ICON;
     b.setAttribute('aria-label','Show password'); b.title='Show password';
