@@ -85,7 +85,7 @@
     const nav = [['./', 'الرئيسية', 'home'], ['./#watches', 'الساعات', 'watches'], ['./#glasses', 'النضارات', 'glasses'], ['./#accessories', 'الاكسسوارات', 'accessories']];
     $('#hdr').innerHTML = `
       <header class="nav-bar"><div class="wrap nav">
-        <a href="./" class="brand" aria-label="DAQQA — الرئيسية"><span class="m">${RC.logo()}</span><span class="wm"><b>DAQQA</b><small>ACCESSORIES</small></span></a>
+        <a href="./" class="brand" aria-label="DAQQA — الرئيسية"><span class="m">${RC.logo()}</span><span class="wm"><b>DAQQA</b><small>WATCHES</small></span></a>
         <nav class="links" aria-label="القائمة">${nav.map(([h, l, k]) => `<a href="${h}" data-kind="${k}" class="${k === active ? 'on' : ''}">${l}</a>`).join('')}</nav>
         <div class="actions">
           <button class="icon-btn theme-btn" id="themeBtn" aria-label="تغيير الوضع"><span class="i-sun">${ICON.sun}</span><span class="i-moon">${ICON.moon}</span></button>
@@ -94,14 +94,14 @@
           <button class="icon-btn" id="cartBtn" aria-label="السلة">${ICON.bag}<span class="cart-count" id="cartCount">0</span></button>
           <button class="icon-btn menu-btn" id="menuBtn" aria-label="القائمة">${ICON.menu}</button>
         </div></div></header>
-      <div class="sheet" id="menuSheet" role="dialog" aria-label="القائمة"><div class="wrap sheet-head"><a href="./" class="brand"><span class="m">${RC.logo()}</span><span class="wm"><b>DAQQA</b><small>ACCESSORIES</small></span></a><button class="icon-btn" data-close aria-label="إغلاق">${ICON.close}</button></div>
+      <div class="sheet" id="menuSheet" role="dialog" aria-label="القائمة"><div class="wrap sheet-head"><a href="./" class="brand"><span class="m">${RC.logo()}</span><span class="wm"><b>DAQQA</b><small>WATCHES</small></span></a><button class="icon-btn" data-close aria-label="إغلاق">${ICON.close}</button></div>
         <div class="wrap sheet-body"><nav class="menu-list">${nav.map(([h, l, k]) => `<a href="${h}" data-kind="${k}" data-close>${l}<span class="en">${RC.kinds[k] ? RC.kinds[k].en.toUpperCase() : '→'}</span></a>`).join('')}</nav></div></div>
       <div class="sheet" id="favSheet" role="dialog" aria-label="المفضلة"><div class="wrap sheet-head"><b style="font-size:18px">المفضلة</b><button class="icon-btn" data-close aria-label="إغلاق">${ICON.close}</button></div><div class="wrap sheet-body"><div class="search-res" id="favRes"></div></div></div>
       <div class="sheet" id="searchSheet" role="dialog" aria-label="بحث"><div class="wrap sheet-head"><b style="font-size:18px">بحث</b><button class="icon-btn" data-close aria-label="إغلاق">${ICON.close}</button></div>
         <div class="wrap sheet-body"><input class="input search-input" id="searchInput" placeholder="دوّر على ساعة، نضارة أو اكسسوار…" autocomplete="off"><div class="search-res" id="searchRes"></div></div></div>`;
     $('#ftr').innerHTML = `<footer class="site-foot"><div class="wrap">
       <div class="foot-grid">
-        <div class="foot-brand"><a href="./" class="brand"><span class="m">${RC.logo()}</span><span class="wm"><b>DAQQA</b><small>ACCESSORIES</small></span></a>
+        <div class="foot-brand"><a href="./" class="brand"><span class="m">${RC.logo()}</span><span class="wm"><b>DAQQA</b><small>WATCHES</small></span></a>
           <p>دقّة — ساعات ونضارات واكسسوارات مختارة بعناية، بأسعار واضحة وعروض حقيقية. الدفع عند الاستلام والشحن لكل مصر.</p></div>
         <div><h4 class="en">SHOP</h4><ul>${Object.entries(RC.kinds).map(([k, v]) => `<li data-kind="${k}"><a href="./#${k}">${v.ar}</a></li>`).join('')}</ul></div>
         <div><h4 class="en">HELP</h4><ul><li>الدفع عند الاستلام</li><li>شحن 2–5 أيام</li><li>استبدال خلال 14 يوم</li><li>ضمان على الماكينة</li></ul></div>
@@ -149,7 +149,7 @@
     let seen = false; try { seen = sessionStorage.getItem('dq-intro') === '1'; sessionStorage.setItem('dq-intro', '1'); } catch (e) {}
     if (window.DQ_NO_INTRO || seen || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const el = document.createElement('div'); el.className = 'intro'; el.setAttribute('aria-hidden', 'true');
-    el.innerHTML = `<div class="door l"></div><div class="door r"></div><div class="intro-c"><div class="m">${RC.dial()}</div><b>DAQQA</b><small>ACCESSORIES</small></div>`;
+    el.innerHTML = `<div class="door l"></div><div class="door r"></div><div class="intro-c"><div class="m">${RC.dial()}</div><b>DAQQA</b><small>WATCHES</small></div>`;
     document.body.appendChild(el); document.documentElement.classList.add('intro-on');
     const done = () => { el.classList.add('open'); document.documentElement.classList.remove('intro-on'); setTimeout(() => el.remove(), 1300); };
     el.addEventListener('click', done, { once: true });
