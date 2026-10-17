@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
+<script>try{var t=localStorage.getItem('dq-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>DAQQA | دقّة — ساعات ونضارات واكسسوارات في مصر</title>
 <meta name="description" content="DAQQA (دقّة) — ساعات ونضارات شمس واكسسوارات رجالي وحريمي: خواتم وحظاظات وبريسليت. أسعار واضحة وخصومات حقيقية، الدفع عند الاستلام وشحن لكل مصر.">
@@ -27,13 +28,13 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Archivo:wght@400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/base.css?v=20261017b">
-<link rel="stylesheet" href="assets/store.css?v=20261017b">
+<link rel="stylesheet" href="assets/base.css?v=20261017c">
+<link rel="stylesheet" href="assets/store.css?v=20261017c">
 <style>
 /* section banner (dark) */
 .banner{position:relative;min-height:560px;display:flex;align-items:center;overflow:hidden;background:var(--hero);border-bottom:1px solid var(--line)}
 .banner .bg{position:absolute;inset:0;background:var(--hero) var(--img) no-repeat;background-size:cover;background-position:left center}
-.banner .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(270deg,var(--hero) 0%,rgba(43,27,13,.92) 34%,rgba(43,27,13,.25) 70%,rgba(43,27,13,.1) 100%),linear-gradient(0deg,rgba(24,17,10,.6),transparent 40%)}
+.banner .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(270deg,var(--hero) 0%,rgb(var(--hero-rgb)/.92) 34%,rgb(var(--hero-rgb)/.25) 70%,rgb(var(--hero-rgb)/.1) 100%),linear-gradient(0deg,rgb(var(--bg-rgb)/.6),transparent 40%)}
 .banner .wrap{position:relative;width:100%}
 .banner .txt{max-width:520px;padding:90px 0}
 .mini-brand{display:inline-flex;flex-direction:column;line-height:1.05;direction:ltr;text-align:left;margin-bottom:34px}
@@ -47,40 +48,40 @@
 .btn-line:hover{background:var(--accent);border-color:var(--accent);color:var(--bg)}
 .section-first .banner{min-height:640px}
 /* banner without a section photo: text + framed product */
-.banner.framed{background:radial-gradient(ellipse at 22% 50%,rgba(208,180,140,.12),transparent 55%),var(--hero)}
+.banner.framed{background:radial-gradient(ellipse at 22% 50%,rgb(var(--accent-rgb)/.12),transparent 55%),var(--hero)}
 .bn-grid{display:grid;grid-template-columns:1fr minmax(0,440px);gap:56px;align-items:center}
 .frame{position:relative;display:block;aspect-ratio:4/5;border-radius:220px 220px 18px 18px;overflow:hidden;border:1px solid var(--line);box-shadow:0 40px 80px -30px rgba(0,0,0,.7)}
 .frame img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s cubic-bezier(.2,.7,.2,1)}
 .frame:hover img{transform:scale(1.05)}
-.frame span{position:absolute;inset:auto 0 0 0;padding:40px 18px 16px;background:linear-gradient(0deg,rgba(24,17,10,.85),transparent);font:500 15px var(--f-display);color:var(--ink);text-align:center}
-.band.plain{min-height:380px;background:radial-gradient(ellipse at 80% 20%,rgba(208,180,140,.08),transparent 50%),var(--bg)}
+.frame span{position:absolute;inset:auto 0 0 0;padding:40px 18px 16px;background:linear-gradient(0deg,rgba(24,17,10,.85),transparent);font:500 15px var(--f-display);color:#F5F0E8;text-align:center}
+.band.plain{min-height:380px;background:radial-gradient(ellipse at 80% 20%,rgb(var(--accent-rgb)/.08),transparent 50%),var(--bg)}
 .band .wm{position:absolute;left:4%;top:50%;transform:translateY(-55%);width:min(420px,46vw);aspect-ratio:184/190;opacity:.07;pointer-events:none}
 /* product strip (cream) */
 .strip-in{padding-top:56px;padding-bottom:64px}
 .strip-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:18px}
-.strip-head h3{font:400 clamp(30px,3.4vw,42px)/1.1 var(--f-display);color:var(--bg)}
+.strip-head h3{font:400 clamp(30px,3.4vw,42px)/1.1 var(--f-display);color:var(--strip-ink)}
 .strip-head h3 small{font:600 15px var(--f-ar);color:var(--btn);margin-inline-start:12px}
-.view-all{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--bg);white-space:nowrap}
+.view-all{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--strip-ink);white-space:nowrap}
 .view-all svg{width:16px;height:16px}
 .view-all:hover{color:var(--btn)}
 .tabs{display:flex;gap:26px;border-bottom:1px solid var(--s-line);margin-bottom:28px;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tabs button{height:46px;font-size:14px;color:var(--s-muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .2s,border-color .2s}
-.tabs button:hover{color:var(--bg)}
-.tabs button.on{color:var(--bg);border-color:var(--bg);font-weight:600}
+.tabs button:hover{color:var(--strip-ink)}
+.tabs button.on{color:var(--strip-ink);border-color:var(--strip-ink);font-weight:600}
 .strip .grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:22px}
 .strip .grid.clip>.card:nth-child(n+5){display:none}
 .strip .empty{color:var(--s-muted)}
 /* lifestyle band (dark) */
 .band{position:relative;min-height:460px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;background:var(--bg)}
 .band .bg{position:absolute;inset:0;background:var(--bg) var(--img) no-repeat;background-size:cover;background-position:center 30%;filter:saturate(.85)}
-.band .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,var(--bg) 8%,rgba(24,17,10,.55) 55%,rgba(24,17,10,.25)),linear-gradient(270deg,rgba(24,17,10,.75),transparent 60%)}
+.band .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,var(--bg) 8%,rgb(var(--bg-rgb)/.55) 55%,rgb(var(--bg-rgb)/.25)),linear-gradient(270deg,rgb(var(--bg-rgb)/.75),transparent 60%)}
 .band .wrap{position:relative;width:100%}
 .band .lbl{font:500 14px var(--f-display);letter-spacing:.3em;color:var(--accent)}
 .band h2{font:400 clamp(36px,4.6vw,60px)/1.05 var(--f-display);color:var(--ink);margin-top:12px}
 .band .ar{font:700 22px 'Amiri',var(--f-ar);color:var(--muted);margin-top:8px}
-.feats{display:grid;grid-template-columns:repeat(4,1fr);margin-top:40px;border-top:1px solid rgba(208,180,140,.22)}
-.feats div{display:flex;flex-direction:column;align-items:center;gap:12px;padding:26px 10px 34px;text-align:center;font-size:13px;color:var(--muted);border-inline-start:1px solid rgba(208,180,140,.22)}
+.feats{display:grid;grid-template-columns:repeat(4,1fr);margin-top:40px;border-top:1px solid rgb(var(--accent-rgb)/.22)}
+.feats div{display:flex;flex-direction:column;align-items:center;gap:12px;padding:26px 10px 34px;text-align:center;font-size:13px;color:var(--muted);border-inline-start:1px solid rgb(var(--accent-rgb)/.22)}
 .feats div:first-child{border-inline-start:0}
 .feats svg{width:34px;height:34px;color:var(--ink)}
 .kind{scroll-margin-top:76px}
@@ -95,7 +96,7 @@
 @media (max-width:760px){
   .banner,.section-first .banner{min-height:auto;flex-direction:column;align-items:stretch}
   .banner .bg{position:relative;inset:auto;height:320px;flex:none}
-  .banner .bg::after{background:linear-gradient(0deg,var(--hero) 2%,rgba(43,27,13,0) 55%)}
+  .banner .bg::after{background:linear-gradient(0deg,var(--hero) 2%,rgb(var(--hero-rgb)/0) 55%)}
   .banner .txt{padding:0 0 44px;max-width:none;margin-top:-30px}
   .banner.framed .txt{margin-top:0;padding:36px 0 8px}
   .bn-grid{grid-template-columns:1fr;gap:0}
@@ -107,7 +108,7 @@
   .band{min-height:440px}
   .feats{grid-template-columns:repeat(2,1fr)}
   .feats div:nth-child(3){border-inline-start:0}
-  .feats div:nth-child(n+3){border-top:1px solid rgba(208,180,140,.22)}
+  .feats div:nth-child(n+3){border-top:1px solid rgb(var(--accent-rgb)/.22)}
   .strip-in{padding-top:40px;padding-bottom:48px}
 }
 </style>
@@ -118,8 +119,8 @@
 <div id="ftr"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="assets/config.js?v=20261017b"></script>
-<script src="assets/app.js?v=20261017b"></script>
+<script src="assets/config.js?v=20261017c"></script>
+<script src="assets/app.js?v=20261017c"></script>
 <script>
 const { discountPct, esc } = RC;
 const $ = s => document.querySelector(s);
@@ -158,26 +159,26 @@ function build() {
     const sale = all.some(p => discountPct(p) > 0);
     state[k] = state[k] || { tab: 'all', all: false };
     return `<section class="kind ${i ? '' : 'section-first'}" id="${k}" aria-label="${K.ar}">
-      <div class="banner ${img.hero ? 'has-photo' : 'framed'}">${img.hero ? `<div class="bg" style="--img:url('${esc(img.hero)}')"></div>` : ''}
-        <div class="wrap ${img.hero ? '' : 'bn-grid'}"><div class="txt reveal">
+      <div class="banner op ${img.hero ? 'has-photo op-curtain op-zoom' : 'framed op-curtain'}" ${img.hero ? 'data-parallax' : ''}>${img.hero ? `<div class="bg" style="--img:url('${esc(img.hero)}')"></div>` : ''}
+        <div class="wrap ${img.hero ? '' : 'bn-grid'}"><div class="txt op op-stagger">
           <div class="mini-brand"><b>DAQQA</b><small>ACCESSORIES</small></div>
           <h2 class="en" dir="ltr" style="text-align:right">${K.banner.en}</h2>
           <div class="ar">${K.banner.ar}</div>
           <p>${K.banner.sub}</p>
           <a class="btn-line" href="#${k}-shop">${K.banner.cta} ${DQ.ICON.arrow}</a>
-        </div>${img.hero ? '' : `<a class="frame reveal" href="${RC.productUrl(img.product)}" aria-label="${esc(img.product.name)}"><img src="${esc(img.product.images[0])}" alt="${esc(img.product.name)}"><span class="en">${esc(img.product.name)}</span></a>`}</div></div>
+        </div>${img.hero ? '' : `<a class="frame op op-arch" href="${RC.productUrl(img.product)}" aria-label="${esc(img.product.name)}"><img src="${esc(img.product.images[0])}" alt="${esc(img.product.name)}"><span class="en">${esc(img.product.name)}</span></a>`}</div></div>
       <div class="strip" id="${k}-shop"><div class="wrap strip-in">
-        <div class="strip-head"><h3 class="en">${K.en}<small>${K.ar}</small></h3><button class="view-all" data-va="${k}"><span>عرض الكل</span> ${DQ.ICON.arrow}</button></div>
-        <div class="tabs" role="tablist">
+        <div class="strip-head op op-stagger"><h3 class="en">${K.en}<small>${K.ar}</small></h3><button class="view-all" data-va="${k}"><span>عرض الكل</span> ${DQ.ICON.arrow}</button></div>
+        <div class="tabs op op-stagger" role="tablist">
           <button data-tab="all" data-k="${k}" class="on">الكل</button>
           ${styles.map(s => `<button class="en" data-tab="${esc(s)}" data-k="${k}">${esc(s)}</button>`).join('')}
           ${sale ? `<button data-tab="__sale" data-k="${k}">العروض</button>` : ''}
         </div>
         <div class="grid clip"></div>
       </div></div>
-      <div class="band ${img.life ? 'has-photo' : 'plain'}">${img.life ? `<div class="bg" style="--img:url('${esc(img.life)}')"></div>` : `<div class="wm" aria-hidden="true">${RC.logo()}</div>`}
-        <div class="wrap"><div class="reveal"><div class="lbl en">DAQQA</div><h2 class="en" dir="ltr" style="text-align:right">${K.band.en}</h2><div class="ar">${K.band.ar}</div></div>
-          <div class="feats">${K.band.feats.map(([ic, t]) => `<div>${DQ.ICON[ic]}<span>${t}</span></div>`).join('')}</div></div></div>
+      <div class="band op op-drop ${img.life ? 'has-photo op-zoom' : 'plain'}" ${img.life ? 'data-parallax' : ''}>${img.life ? `<div class="bg" style="--img:url('${esc(img.life)}')"></div>` : `<div class="wm" aria-hidden="true">${RC.logo()}</div>`}
+        <div class="wrap"><div class="op op-stagger"><div class="lbl en">DAQQA</div><h2 class="en" dir="ltr" style="text-align:right">${K.band.en}</h2><div class="ar">${K.band.ar}</div></div>
+          <div class="feats op op-stagger">${K.band.feats.map(([ic, t]) => `<div>${DQ.ICON[ic]}<span>${t}</span></div>`).join('')}</div></div></div>
     </section>`;
   }).join('');
   live.forEach(renderStrip);

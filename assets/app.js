@@ -21,6 +21,8 @@
     eye: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 16s5-8 13-8 13 8 13 8-5 8-13 8S3 16 3 16z"/><circle cx="16" cy="16" r="4"/></svg>',
     link: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M13 19l6-6M11 15l-3 3a4.2 4.2 0 0 0 6 6l3-3M21 17l3-3a4.2 4.2 0 0 0-6-6l-3 3"/></svg>',
     gift: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M5 12h22v5H5zM7 17h18v11H7zM16 12v16"/><path d="M16 12c-2-5-8-6-8-2 0 2 4 2 8 2zM16 12c2-5 8-6 8-2 0 2-4 2-8 2z"/></svg>',
+    sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>',
+    moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20.5 13.6A8.5 8.5 0 1 1 10.4 3.5a6.7 6.7 0 0 0 10.1 10.1z"/></svg>',
     star: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M16 4l3.6 7.6 8.4 1-6.2 5.8 1.6 8.3L16 22.6l-7.4 4.1 1.6-8.3L4 12.6l8.4-1z"/></svg>'
   };
   const GOV = ['القاهرة','الجيزة','القليوبية','الإسكندرية','الشرقية','الدقهلية','الغربية','المنوفية','البحيرة','كفر الشيخ','دمياط','بورسعيد','الإسماعيلية','السويس','الفيوم','بني سويف','المنيا','أسيوط','سوهاج','قنا','الأقصر','أسوان','البحر الأحمر','مطروح','شمال سيناء','جنوب سيناء','الوادي الجديد'];
@@ -30,8 +32,20 @@
 
   /* ---------- small helpers ---------- */
   DQ.toast = (msg, type = '') => { const t = document.createElement('div'); t.className = 'toast ' + type; t.textContent = msg; $('#toasts').appendChild(t); setTimeout(() => { t.style.transition = 'opacity .3s'; t.style.opacity = 0; setTimeout(() => t.remove(), 300) }, 2800); };
-  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target) } }), { threshold: .12, rootMargin: '0px 0px -8% 0px' });
-  DQ.reveal = () => document.querySelectorAll('.reveal:not(.in), .op:not(.in)').forEach(el => io.observe(el));
+  // scroll reveals: measured with getBoundingClientRect (an IntersectionObserver never fires for clip-path:inset(..) elements, which have zero visible area until they open)
+  let pending = [], checkQueued = false;
+  function check() {
+    checkQueued = false; const vh = innerHeight;
+    pending = pending.filter(el => {
+      if (!el.isConnected) return false;
+      const r = el.getBoundingClientRect();
+      if (r.top < vh * .9 && r.bottom > 0) { el.classList.add('in'); if (el.classList.contains('op-zoom')) setTimeout(() => el.classList.add('settled'), 2000); return false; }
+      return true;
+    });
+  }
+  const queueCheck = () => { if (!checkQueued) { checkQueued = true; requestAnimationFrame(check); } };
+  addEventListener('scroll', queueCheck, { passive: true }); addEventListener('resize', queueCheck);
+  DQ.reveal = () => { document.querySelectorAll('.reveal:not(.in), .op:not(.in)').forEach(el => { if (!pending.includes(el)) pending.push(el); }); queueCheck(); };
   // gentle parallax for section backgrounds (data-parallax) — one rAF per frame, skipped for reduced motion
   if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
     let ticking = false;
@@ -74,6 +88,7 @@
         <a href="./" class="brand" aria-label="DAQQA — الرئيسية"><span class="m">${RC.logo()}</span><span class="wm"><b>DAQQA</b><small>ACCESSORIES</small></span></a>
         <nav class="links" aria-label="القائمة">${nav.map(([h, l, k]) => `<a href="${h}" data-kind="${k}" class="${k === active ? 'on' : ''}">${l}</a>`).join('')}</nav>
         <div class="actions">
+          <button class="icon-btn theme-btn" id="themeBtn" aria-label="تغيير الوضع"><span class="i-sun">${ICON.sun}</span><span class="i-moon">${ICON.moon}</span></button>
           <button class="icon-btn" id="searchBtn" aria-label="بحث">${ICON.search}</button>
           <button class="icon-btn" id="favBtn" aria-label="المفضلة">${ICON.heart}<span class="cart-count" id="favCount">0</span></button>
           <button class="icon-btn" id="cartBtn" aria-label="السلة">${ICON.bag}<span class="cart-count" id="cartCount">0</span></button>
@@ -99,6 +114,7 @@
 
     $('#cartBtn').onclick = () => DQ.openCart('cart');
     $('#menuBtn').onclick = () => openSheet('#menuSheet');
+    $('#themeBtn').onclick = toggleTheme;
     $('#favBtn').onclick = () => { renderFavs(); openSheet('#favSheet'); };
     $('#searchBtn').onclick = () => { openSheet('#searchSheet'); setTimeout(() => $('#searchInput').focus(), 80); };
     $('#searchInput').oninput = e => renderSearch(e.target.value);
@@ -106,9 +122,9 @@
     document.addEventListener('click', e => {
       if (e.target.closest('[data-close]')) DQ.closeAll();
       const add = e.target.closest('[data-add]');
-      if (add) { e.preventDefault(); DQ.addToCart(+add.dataset.add, 1); }
+      if (add) { e.preventDefault(); pop(add); DQ.addToCart(+add.dataset.add, 1); }
       const fv = e.target.closest('[data-fav]');
-      if (fv) { e.preventDefault(); DQ.toggleFav(+fv.dataset.fav); }
+      if (fv) { e.preventDefault(); pop(fv); DQ.toggleFav(+fv.dataset.fav); }
     });
     addEventListener('keydown', e => { if (e.key === 'Escape') DQ.closeAll(); });
     $('#drBody').addEventListener('click', e => {
@@ -116,6 +132,45 @@
       if (q) { const l = DQ.cart.find(c => c.id === +q.dataset.q), p = DQ.byId(l.id); l.qty = Math.max(1, Math.min(p.stock, 20, l.qty + +q.dataset.d)); saveCart(); renderCart(); }
       if (rm) { DQ.cart = DQ.cart.filter(c => c.id !== +rm.dataset.rm); saveCart(); renderCart(); }
     });
+  }
+  function pop(el) { el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+  /* ---------- light / dark with a circular "pop" from the button ---------- */
+  function toggleTheme(e) {
+    const html = document.documentElement, next = html.dataset.theme === 'light' ? 'dark' : 'light';
+    const r = e.currentTarget.getBoundingClientRect();
+    html.style.setProperty('--vt-x', (r.left + r.width / 2) + 'px'); html.style.setProperty('--vt-y', (r.top + r.height / 2) + 'px');
+    pop(e.currentTarget);
+    const apply = () => { html.dataset.theme = next; try { localStorage.setItem('dq-theme', next) } catch (er) {} document.querySelector('meta[name=theme-color]')?.setAttribute('content', next === 'light' ? '#EFE6D8' : '#20160E'); };
+    if (document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.startViewTransition(apply); else apply();
+  }
+  /* ---------- intro: the Q dial winds up, then the doors open (once per visit) ---------- */
+  function intro() {
+    let seen = false; try { seen = sessionStorage.getItem('dq-intro') === '1'; sessionStorage.setItem('dq-intro', '1'); } catch (e) {}
+    if (seen || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const el = document.createElement('div'); el.className = 'intro'; el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = `<div class="door l"></div><div class="door r"></div><div class="intro-c"><div class="m">${RC.dial()}</div><b>DAQQA</b><small>ACCESSORIES</small></div>`;
+    document.body.appendChild(el); document.documentElement.classList.add('intro-on');
+    const done = () => { el.classList.add('open'); document.documentElement.classList.remove('intro-on'); setTimeout(() => el.remove(), 1300); };
+    el.addEventListener('click', done, { once: true });
+    setTimeout(done, 1700);
+  }
+  /* ---------- mouse: trailing ring + card tilt (fine pointers only) ---------- */
+  function mouseFx() {
+    if (!matchMedia('(hover: hover) and (pointer: fine)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const ring = document.createElement('div'); ring.className = 'cursor-ring'; ring.setAttribute('aria-hidden', 'true'); document.body.appendChild(ring);
+    let x = -100, y = -100, rx = x, ry = y;
+    addEventListener('pointermove', e => { x = e.clientX; y = e.clientY; ring.classList.add('on');
+      const t = e.target.closest && e.target.closest('a, button, .card, [role=tab], select, input, textarea, label');
+      ring.classList.toggle('big', !!t && !t.matches('input, textarea, select')); ring.classList.toggle('txt', !!t && t.matches('input, textarea')); }, { passive: true });
+    document.addEventListener('pointerleave', () => ring.classList.remove('on'));
+    document.addEventListener('pointerdown', () => ring.classList.add('press')); document.addEventListener('pointerup', () => ring.classList.remove('press'));
+    (function loop() { rx += (x - rx) * .2; ry += (y - ry) * .2; ring.style.transform = `translate(${rx}px, ${ry}px)`; requestAnimationFrame(loop); })();
+    document.addEventListener('pointermove', e => {
+      const c = e.target.closest && e.target.closest('.card.in'); document.querySelectorAll('.card.tilting').forEach(o => { if (o !== c) { o.classList.remove('tilting'); o.style.transform = ''; } });
+      if (!c) return; const r = c.getBoundingClientRect(), px = (e.clientX - r.left) / r.width - .5, py = (e.clientY - r.top) / r.height - .5;
+      c.classList.add('tilting'); c.style.transform = `perspective(900px) rotateX(${(-py * 7).toFixed(2)}deg) rotateY(${(px * 9).toFixed(2)}deg) translateY(-6px)`;
+      c.style.setProperty('--gx', (px + .5) * 100 + '%'); c.style.setProperty('--gy', (py + .5) * 100 + '%');
+    }, { passive: true });
   }
   function openSheet(id) { DQ.closeAll(); $(id).classList.add('on'); document.body.style.overflow = 'hidden'; }
   function renderSearch(q) {
@@ -220,7 +275,7 @@
   };
 
   DQ.start = async (active, onReady) => {
-    chrome(active);
+    intro(); chrome(active); mouseFx();
     try { await DQ.load(); } catch (e) { console.error(e); DQ.loadError = true; }
     onReady && onReady();
     DQ.reveal();

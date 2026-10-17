@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
+<script>try{var t=localStorage.getItem('dq-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>DAQQA</title>
 <meta name="description" content="منتج من DAQQA — الدفع عند الاستلام وشحن لكل مصر.">
@@ -19,8 +20,8 @@
 <link rel="apple-touch-icon" href="assets/icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Archivo:wght@400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/base.css?v=20261017b">
-<link rel="stylesheet" href="assets/store.css?v=20261017b">
+<link rel="stylesheet" href="assets/base.css?v=20261017c">
+<link rel="stylesheet" href="assets/store.css?v=20261017c">
 <style>
 .crumbs{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted-2);padding:22px 0;flex-wrap:wrap}
 .crumbs a:hover{color:var(--accent)}
@@ -121,8 +122,8 @@ details .body{padding:0 0 20px;color:var(--muted);font-size:15px;white-space:pre
 <div id="ftr"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="assets/config.js?v=20261017b"></script>
-<script src="assets/app.js?v=20261017b"></script>
+<script src="assets/config.js?v=20261017c"></script>
+<script src="assets/app.js?v=20261017c"></script>
 <script>
 const { money, finalPrice, discountPct, esc, categories } = RC;
 const $ = s => document.querySelector(s);
@@ -171,14 +172,14 @@ function render() {
     <nav class="crumbs" aria-label="مسار الصفحة"><a href="./">الرئيسية</a><span>/</span><a href="./#${kind}">${K.ar}</a><span>/</span><span>${esc(cat)}</span><span>/</span><span class="en">${esc(p.name)}</span></nav>
     <div class="pd">
       <div class="gal">
-        <div style="position:relative">
+        <div style="position:relative" class="op op-curtain">
           ${off ? `<span class="badge-off">-${off}%</span>` : ''}
           <div class="slides" id="slides">${imgs.map((u, i) => `<div class="slide"><img src="${esc(u)}" alt="${esc(p.name)} — صورة ${i + 1}" ${i ? 'loading="lazy"' : ''} onerror="this.src='${DQ.FALLBACK}'"></div>`).join('')}</div>
         </div>
         ${imgs.length > 1 ? `<div class="thumbs" id="thumbs">${imgs.map((u, i) => `<button class="${i ? '' : 'on'}" data-i="${i}" aria-label="صورة ${i + 1}"><img src="${esc(u)}" alt=""></button>`).join('')}</div>
         <div class="dots" id="dots">${imgs.map((u, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div>` : ''}
       </div>
-      <div class="info">
+      <div class="info op op-stagger">
         <span class="cat">${K.ar} · ${esc(cat)}${p.brand && !/recharge/i.test(p.brand) ? ' · <span class="en">' + esc(p.brand) + '</span>' : ''}</span>
         <h1 class="en" dir="ltr" style="text-align:right">${esc(p.name)}</h1>
         <span class="pd-sku en">${RC.sku(p)}${p.style ? ' · ' + esc(p.style) : ''}</span>
