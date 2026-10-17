@@ -9,7 +9,7 @@
 <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Bodoni+Moda:wght@500&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/base.css?v=20261017b">
+<link rel="stylesheet" href="assets/base.css?v=20261017p">
 <script>try{const t=localStorage.getItem('rc-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <style>
 body{font-size:14px}
@@ -141,7 +141,22 @@ main{flex:1;min-width:0;padding:28px 32px 60px}
 .preview-price{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:10px;border-top:1px dashed var(--line-2);flex-wrap:wrap}
 .preview-price .prices{display:flex;gap:8px;align-items:baseline;font-family:var(--f-ui)}
 .preview-price .price-new{font-size:20px}
-.check{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px}
+.check{display:flex;align-items:center;gap:12px;cursor:pointer;font-size:15px;font-weight:600;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);transition:border-color .2s,background .2s}
+.check:has(input:checked){border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--bg))}
+.check input{width:20px;height:20px;accent-color:var(--accent);flex:none}
+.clr-list{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.clr-chip{display:inline-flex;align-items:center;gap:8px;padding:5px 6px 5px 12px;border:1px solid var(--line);border-radius:999px;background:var(--bg)}
+.clr-chip i{width:24px;height:24px;border-radius:50%;box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--line-2)}
+.clr-chip b{font:600 13px var(--f-ui);letter-spacing:.04em;color:var(--ink)}
+.clr-chip button{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;color:var(--muted);font-size:16px;line-height:1}
+.clr-chip button:hover{background:var(--red);color:var(--bg)}
+.clr-empty{font-size:13px;color:var(--muted-2)}
+.clr-add{display:flex;gap:8px;align-items:center;margin-top:10px}
+.clr-pick{position:relative;width:48px;height:48px;flex:none;border-radius:12px;border:1px solid var(--line);display:grid;place-items:center;cursor:pointer;background:var(--bg)}
+.clr-pick i{width:30px;height:30px;border-radius:50%;box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--line-2)}
+.clr-pick input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+#f_hex{font:600 15px var(--f-ui);letter-spacing:.06em;text-transform:uppercase;max-width:150px}
+#f_hex.bad{border-color:var(--red);box-shadow:0 0 0 3px rgb(217 138 110/.2)}
 .empty{padding:50px 20px;text-align:center;color:var(--muted)}
 .confirm{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:20px;background:rgba(0,0,0,.6)}
 .confirm .box{background:var(--bg-2);border:1px solid var(--line);border-radius:18px;padding:22px;width:min(360px,100%);display:flex;flex-direction:column;gap:14px}
@@ -239,7 +254,7 @@ main{flex:1;min-width:0;padding:28px 32px 60px}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="assets/config.js?v=20261017b"></script>
+<script src="assets/config.js?v=20261017p"></script>
 <script>
 const {money, finalPrice, discountPct, esc, categories, statuses} = RC;
 // read this before the client consumes the link: a password-recovery link lands here with type=recovery
@@ -502,10 +517,14 @@ function renderEditor() {
         <div class="field"><label>القسم</label><select class="input" id="f_kind" ${COLS.kind ? '' : 'disabled title="محتاج تفعيل من Supabase"'}>${Object.entries(RC.kinds).map(([k,v]) => `<option value="${k}" ${k===d.kind?'selected':''}>${v.ar} — ${v.en}</option>`).join('')}</select></div>
         <div class="field"><label>النوع (بيظهر كتاب)</label><input class="input en" id="f_style" list="styleList" value="${esc(d.style || '')}" placeholder="${RC.kinds[d.kind].styles.slice(0,2).join(' / ')}" ${COLS.style ? '' : 'disabled'}><datalist id="styleList">${RC.kinds[d.kind].styles.map(x => `<option value="${x}">`).join('')}</datalist></div>
       </div>
-      <div class="field"><label>الألوان المتاحة</label>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" id="colorRow">${(d.colors || []).map((c, i) => `<button type="button" data-rmc="${i}" title="شيل اللون" style="width:30px;height:30px;border-radius:50%;background:${c};box-shadow:0 0 0 2px var(--line)"></button>`).join('')}
-          <label class="btn btn-ghost btn-sm" style="cursor:pointer;${COLS.colors ? '' : 'opacity:.5;pointer-events:none'}">+ لون<input type="color" id="f_color" value="#1b1b1b" style="position:absolute;opacity:0;width:0;height:0"></label></div>
-        <small style="color:var(--muted-2);font-size:12px">دوس على أي لون عشان تشيله.</small></div>
+      <div class="field"><label>الألوان المتاحة <small style="color:var(--muted-2);font-weight:400">(لحد 6 ألوان)</small></label>
+        <div class="clr-list" id="colorRow">${(d.colors || []).map((c, i) => `<span class="clr-chip"><i style="background:${c}"></i><b class="en">${c.toUpperCase()}</b><button type="button" data-rmc="${i}" title="شيل اللون" aria-label="شيل اللون">×</button></span>`).join('') || '<span class="clr-empty">مفيش ألوان لسه</span>'}</div>
+        <div class="clr-add" style="${COLS.colors ? '' : 'opacity:.5;pointer-events:none'}">
+          <label class="clr-pick" title="اختار من الألوان"><i id="f_cprev" style="background:#1B1B1B"></i><input type="color" id="f_color" value="#1b1b1b"></label>
+          <input class="input en" id="f_hex" value="#1B1B1B" maxlength="7" dir="ltr" placeholder="#RRGGBB" spellcheck="false">
+          <button type="button" class="btn btn-amber btn-sm" id="f_cadd">+ إضافة</button>
+        </div>
+        <small style="color:var(--muted-2);font-size:12px">اكتب كود اللون (زي <b class="en">#C9A46A</b>) أو اختاره من الدايرة، وبعدين إضافة. × عشان تشيل لون.</small></div>
       <div class="field"><label>اسم المنتج *</label><input class="input en" id="f_name" value="${esc(d.name)}" dir="ltr" style="text-align:right"></div>
       <div class="two">
         <div class="field"><label>الماركة</label><input class="input en" id="f_brand" value="${esc(d.brand)}"></div>
@@ -533,7 +552,14 @@ function renderEditor() {
   updatePreview();
   $('#edClose').onclick = closeEditor;
   $('#f_kind').onchange = () => { syncDraft(); renderEditor(); };
-  $('#f_color').onchange = e => { syncDraft(); draft.colors = [...(draft.colors || []), e.target.value].slice(0, 6); renderEditor(); };
+  const normHex = v => { v = String(v || '').trim().replace(/^#?/, '#').toUpperCase(); if (/^#[0-9A-F]{3}$/.test(v)) v = '#' + [...v.slice(1)].map(x => x + x).join(''); return /^#[0-9A-F]{6}$/.test(v) ? v : null; };
+  const setPrev = h => { $('#f_cprev').style.background = h; $('#f_color').value = h.toLowerCase(); };
+  $('#f_color').oninput = e => { const h = e.target.value.toUpperCase(); $('#f_hex').value = h; $('#f_cprev').style.background = h; $('#f_hex').classList.remove('bad'); };
+  $('#f_hex').oninput = e => { const h = normHex(e.target.value); e.target.classList.toggle('bad', !h && e.target.value.length > 1); if (h) setPrev(h); };
+  const addColor = () => { const h = normHex($('#f_hex').value); if (!h) { $('#f_hex').classList.add('bad'); return toast('اكتب كود صحيح زي #C9A46A', 'err'); }
+    syncDraft(); const list = (draft.colors || []).map(c => c.toUpperCase()); if (list.includes(h)) return toast('اللون ده موجود'); if (list.length >= 6) return toast('أقصى حاجة 6 ألوان', 'err');
+    draft.colors = [...(draft.colors || []), h]; renderEditor(); };
+  $('#f_cadd').onclick = addColor; $('#f_hex').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); addColor(); } };
   $('#colorRow').onclick = e => { const b = e.target.closest('[data-rmc]'); if (b) { syncDraft(); draft.colors.splice(+b.dataset.rmc, 1); renderEditor(); } };
   $('#upBtn').onclick = () => $('#fileIn').click();
   const up = $('#upBtn');

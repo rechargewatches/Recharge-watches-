@@ -32,7 +32,7 @@
   --bg-2:#EFE6D8; --surface:#FBF7F1; --surface-2:#EFE6D8; --muted-2:#8a7660; --line-2:#CDBBA2;
   --amber:#8A6438; --amber-2:#A8794F; --amber-ink:#FBF7F1; --red:#a9502f; --green:#4f6b3a; --blue:#3b5276;
   --glow:rgba(138,100,56,.16); --shadow:0 24px 60px -28px rgba(60,40,20,.35);
-  --btn-ink:#F6F1E9; --strip-bg:#FFFFFF; --strip-ink:#18110A;
+  --btn-ink:#F6F1E9; --strip-bg:#F3ECE1; --strip-ink:#18110A;
   --hero-rgb:231 218 202; --bg-rgb:246 241 233; --accent-rgb:138 100 56;
   color-scheme:light;
 }

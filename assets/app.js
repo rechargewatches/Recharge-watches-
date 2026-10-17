@@ -75,7 +75,7 @@
       <div class="bd"><h3 class="en"><a href="${url}">${esc(p.name)}</a></h3>
         <span class="sku en">${RC.sku(p)}${p.style ? ' · ' + esc(p.style) : ''}</span>
         <div class="row">${DQ.priceHTML(p)}${p.stock > 0 ? `<button class="add" data-add="${p.id}" aria-label="أضف ${esc(p.name)} للسلة">${ICON.plus}</button>` : ''}</div>
-        ${cols.length ? `<div class="sw">${cols.map(c => `<i style="background:${c}"></i>`).join('')}</div>` : ''}
+        ${cols.length ? `<div class="sw">${cols.map(c => `<i style="background:${c}" title="${c.toUpperCase()}"></i>`).join('')}</div>` : ''}
       </div></article>`;
   };
   DQ.wa = () => (DQ.settings.whatsapp || '').replace(/\D/g, '');
