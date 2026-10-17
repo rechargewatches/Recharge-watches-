@@ -1,10 +1,13 @@
 // DAQQA Watches — shared storefront logic (header, footer, search, cart, checkout)
 (function () {
   const { money, finalPrice, discountPct, esc, categories } = RC;
-  const sb = supabase.createClient(RC.url, RC.key, { auth: { persistSession: false } });
+  // sessions are kept so a signed-in customer stays signed in and their orders are linked to them
+  const sb = supabase.createClient(RC.url, RC.key, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
   const $ = (s, r = document) => r.querySelector(s);
   const FALLBACK = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><rect width="400" height="400" fill="#20160E"/><circle cx="200" cy="200" r="84" fill="none" stroke="#4A3828" stroke-width="10"/><path d="M200 200V140M200 200L250 250" stroke="#4A3828" stroke-width="8" stroke-linecap="round"/></svg>');
   const ICON = {
+    user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.2-3.6 4.1-5.4 7.5-5.4s6.3 1.8 7.5 5.4"/></svg>',
+    google: '<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>',
     search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
     bag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>',
     menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M10 17h10"/></svg>',
@@ -91,12 +94,14 @@
           <button class="icon-btn theme-btn" id="themeBtn" aria-label="تغيير الوضع"><span class="i-sun">${ICON.sun}</span><span class="i-moon">${ICON.moon}</span></button>
           <button class="icon-btn" id="searchBtn" aria-label="بحث">${ICON.search}</button>
           <button class="icon-btn" id="favBtn" aria-label="المفضلة">${ICON.heart}<span class="cart-count" id="favCount">0</span></button>
+          <button class="icon-btn" id="accBtn" aria-label="حسابي">${ICON.user}<span class="acc-dot" id="accDot"></span></button>
           <button class="icon-btn" id="cartBtn" aria-label="السلة">${ICON.bag}<span class="cart-count" id="cartCount">0</span></button>
           <button class="icon-btn menu-btn" id="menuBtn" aria-label="القائمة">${ICON.menu}</button>
         </div></div></header>
       <div class="sheet" id="menuSheet" role="dialog" aria-label="القائمة"><div class="wrap sheet-head"><a href="./" class="brand"><span class="m">${RC.logo()}</span><span class="wm"><b>DAQQA</b><small>WATCHES</small></span></a><button class="icon-btn" data-close aria-label="إغلاق">${ICON.close}</button></div>
         <div class="wrap sheet-body"><nav class="menu-list">${nav.map(([h, l, k]) => `<a href="${h}" data-kind="${k}" data-close>${l}<span class="en">${RC.kinds[k] ? RC.kinds[k].en.toUpperCase() : '→'}</span></a>`).join('')}</nav></div></div>
       <div class="sheet" id="favSheet" role="dialog" aria-label="المفضلة"><div class="wrap sheet-head"><b style="font-size:18px">المفضلة</b><button class="icon-btn" data-close aria-label="إغلاق">${ICON.close}</button></div><div class="wrap sheet-body"><div class="search-res" id="favRes"></div></div></div>
+      <div class="sheet" id="accSheet" role="dialog" aria-label="حسابي"><div class="wrap sheet-head"><b style="font-size:18px" id="accTitle">حسابي</b><button class="icon-btn" data-close aria-label="إغلاق">${ICON.close}</button></div><div class="wrap sheet-body"><div class="acc" id="accBody"></div></div></div>
       <div class="sheet" id="searchSheet" role="dialog" aria-label="بحث"><div class="wrap sheet-head"><b style="font-size:18px">بحث</b><button class="icon-btn" data-close aria-label="إغلاق">${ICON.close}</button></div>
         <div class="wrap sheet-body"><input class="input search-input" id="searchInput" placeholder="دوّر على ساعة، نضارة أو اكسسوار…" autocomplete="off"><div class="search-res" id="searchRes"></div></div></div>`;
     $('#ftr').innerHTML = `<footer class="site-foot"><div class="wrap">
@@ -113,6 +118,7 @@
       <div class="toast-wrap" id="toasts"></div>`;
 
     $('#cartBtn').onclick = () => DQ.openCart('cart');
+    $('#accBtn').onclick = () => DQ.openAccount();
     $('#menuBtn').onclick = () => openSheet('#menuSheet');
     $('#themeBtn').onclick = toggleTheme;
     $('#favBtn').onclick = () => { renderFavs(); openSheet('#favSheet'); };
@@ -263,7 +269,8 @@
     } else if (view === 'checkout') {
       $('#drTitle').textContent = 'بيانات الطلب';
       let saved = {}; try { saved = JSON.parse(localStorage.getItem('dq-cust') || localStorage.getItem('rc-cust') || '{}') } catch (e) {}
-      $('#drBody').innerHTML = `<form class="form-grid" id="coForm" autocomplete="on">
+      if (DQ.user && !saved.name) saved.name = userName(DQ.user);
+      $('#drBody').innerHTML = (DQ.user ? `<div class="acc-note ok">الطلب هيتحفظ في حسابك <b class="en">${esc(DQ.user.email || '')}</b></div>` : `<div class="acc-note">عندك حساب؟ <button type="button" class="acc-link" id="coLogin">سجّل دخول</button> عشان طلبك يتحفظ وتتابعه.</div>`) + `<form class="form-grid" id="coForm" autocomplete="on">
         <div class="field"><label for="f-name">الاسم *</label><input id="f-name" class="input" name="name" required value="${esc(saved.name || '')}" autocomplete="name"></div>
         <div class="field"><label for="f-phone">رقم الموبايل *</label><input id="f-phone" class="input en" name="phone" required inputmode="tel" pattern="[0-9+ ]{10,15}" value="${esc(saved.phone || '')}" autocomplete="tel" dir="ltr" style="text-align:right"></div>
         <div class="field"><label for="f-city">المحافظة *</label><select id="f-city" class="input" name="city" required><option value="">اختار المحافظة</option>${GOV.map(c => `<option ${c === saved.city ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
@@ -271,6 +278,7 @@
         <div class="field"><label for="f-notes">ملاحظات</label><textarea id="f-notes" class="input" name="notes" rows="2" placeholder="اختياري"></textarea></div></form>`;
       $('#drFoot').innerHTML = sum + `<span class="ship-note">الدفع كاش عند الاستلام.</span><div style="display:flex;gap:8px"><button class="btn btn-ghost" id="back">رجوع</button><button class="btn btn-amber" id="place" style="flex:1">تأكيد الطلب · ${money(t.total)}</button></div>`;
       $('#back').onclick = () => { view = 'cart'; renderCart(); };
+      if ($('#coLogin')) $('#coLogin').onclick = () => DQ.openAccount('login');
       $('#place').onclick = placeOrder;
     }
   }
@@ -284,16 +292,118 @@
     const ls = lines(); DQ.cart = []; saveCart(); view = 'done';
     $('#cartCount').classList.remove('show'); $('#drTitle').textContent = 'تم الطلب';
     const msg = encodeURIComponent(`طلب جديد ${data.code} — DAQQA\n${ls.map(l => `${l.p.name} × ${l.qty}`).join('\n')}\nالإجمالي: ${money(data.total)}\nالاسم: ${d.name}`);
-    $('#drBody').innerHTML = `<div class="success"><div class="m">${RC.logo()}</div><h3>طلبك وصل!</h3><p style="color:var(--muted)">هنكلمك قريب لتأكيد الطلب. رقم الطلب:</p><code class="en">${esc(data.code)}</code><p style="color:var(--muted)">الإجمالي: <b class="en" style="color:var(--ink)">${money(data.total)}</b></p></div>`;
+    $('#drBody').innerHTML = `<div class="success"><div class="m">${RC.logo()}</div><h3>طلبك وصل!</h3><p style="color:var(--muted)">هنكلمك قريب لتأكيد الطلب. رقم الطلب:</p><code class="en">${esc(data.code)}</code><p style="color:var(--muted)">الإجمالي: <b class="en" style="color:var(--ink)">${money(data.total)}</b></p>${DQ.user ? '<p style="color:var(--muted);font-size:14px">اتحفظ في حسابك، تقدر تتابعه من «حسابي».</p>' : ''}</div>`;
     $('#drFoot').innerHTML = (DQ.wa() ? `<a class="btn btn-amber" target="_blank" rel="noopener" href="https://wa.me/${DQ.wa()}?text=${msg}">أكّد على واتساب</a>` : '') + `<button class="btn btn-ghost" data-close>كمّل تسوّق</button>`;
     DQ.load().then(() => DQ.onRefresh && DQ.onRefresh());
   }
   DQ.openCart = (v = 'cart') => { DQ.closeAll(); view = v; renderCart(); $('#drawer').classList.add('on'); $('#overlay').classList.add('on'); document.body.style.overflow = 'hidden'; };
   DQ.closeAll = () => {
-    ['#drawer', '#overlay', '#menuSheet', '#searchSheet', '#favSheet'].forEach(s => $(s) && $(s).classList.remove('on'));
+    ['#drawer', '#overlay', '#menuSheet', '#searchSheet', '#favSheet', '#accSheet'].forEach(s => $(s) && $(s).classList.remove('on'));
     document.body.style.overflow = '';
     if (view === 'done') { view = 'cart'; setTimeout(renderCart, 400); }
   };
+
+  /* ---------- account: Google or email + password; orders are saved to the account ---------- */
+  DQ.user = null; DQ.isAdmin = false;
+  let accMode = 'login', accMsg = '';
+  const STATUS = { new: 'جديد', confirmed: 'اتأكد', shipped: 'في الطريق', delivered: 'اتسلم', cancelled: 'اتلغى' };
+  const userName = u => (u && (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name))) || (u && u.email ? u.email.split('@')[0] : '');
+  async function setUser(u) {
+    DQ.user = u || null; DQ.isAdmin = false;
+    const dot = $('#accDot'); if (dot) dot.classList.toggle('on', !!u);
+    if (u) { try { const r = await sb.rpc('shop_is_admin'); DQ.isAdmin = !!r.data; } catch (e) {} }
+    if ($('#accSheet') && $('#accSheet').classList.contains('on')) renderAccount();
+    if (view === 'checkout' && $('#drawer') && $('#drawer').classList.contains('on')) renderCart();
+  }
+  const back = () => location.origin + location.pathname + location.search;
+  DQ.signInGoogle = async () => {
+    const { error } = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: back() } });
+    if (error) DQ.toast('الدخول بجوجل مش متاح دلوقتي', 'err');
+  };
+  function authError(m) {
+    m = String(m || '');
+    if (/invalid login/i.test(m)) return 'الإيميل أو الباسورد غلط';
+    if (/not confirmed/i.test(m)) return 'لازم تأكد الإيميل الأول، بص على رسالة التأكيد';
+    if (/already registered|already exists/i.test(m)) return 'الإيميل ده عليه حساب، سجّل دخول';
+    if (/at least|weak|short/i.test(m)) return 'الباسورد لازم 6 حروف على الأقل';
+    if (/rate|seconds/i.test(m)) return 'استنى دقيقة وجرّب تاني';
+    return 'حصلت مشكلة، جرّب تاني';
+  }
+  async function renderAccount() {
+    const box = $('#accBody'); if (!box) return;
+    const u = DQ.user;
+    if (!u) {
+      $('#accTitle').textContent = accMode === 'signup' ? 'حساب جديد' : accMode === 'forgot' ? 'نسيت الباسورد' : 'تسجيل الدخول';
+      const note = accMsg ? `<div class="acc-note">${esc(accMsg)}</div>` : '';
+      if (accMode === 'forgot') {
+        box.innerHTML = `<p class="acc-lead">اكتب إيميلك وهنبعتلك لينك تعمل منه باسورد جديد.</p>${note}
+          <form class="acc-form" id="accForm"><div class="field"><label for="a-em">الإيميل</label><input id="a-em" class="input en" type="email" required autocomplete="email" dir="ltr"></div>
+          <button class="btn btn-amber" type="submit">ابعت اللينك</button></form>
+          <button class="acc-link" data-mode="login">← رجوع لتسجيل الدخول</button>`;
+      } else {
+        const up = accMode === 'signup';
+        box.innerHTML = `<p class="acc-lead">${up ? 'اعمل حساب وكل طلباتك هتتحفظ فيه.' : 'ادخل وشوف طلباتك، والطلبات الجاية تتحفظ في حسابك.'}</p>${note}
+          <button class="btn acc-google" id="gBtn" type="button">${ICON.google}<span>${up ? 'سجّل بحساب Google' : 'ادخل بحساب Google'}</span></button>
+          <div class="acc-or"><span>أو بالإيميل</span></div>
+          <form class="acc-form" id="accForm" autocomplete="on">
+            ${up ? `<div class="field"><label for="a-name">الاسم</label><input id="a-name" class="input" required autocomplete="name"></div>` : ''}
+            <div class="field"><label for="a-em">الإيميل</label><input id="a-em" class="input en" type="email" required autocomplete="email" dir="ltr"></div>
+            <div class="field"><label for="a-pw">الباسورد</label><input id="a-pw" class="input en" type="password" required minlength="6" autocomplete="${up ? 'new-password' : 'current-password'}" dir="ltr"></div>
+            <button class="btn btn-amber" type="submit" id="accSubmit">${up ? 'اعمل الحساب' : 'دخول'}</button>
+          </form>
+          ${up ? '' : '<button class="acc-link" data-mode="forgot">نسيت الباسورد؟</button>'}
+          <div class="acc-switch">${up ? 'عندك حساب؟ <button class="acc-link" data-mode="login">سجّل دخول</button>' : 'أول مرة؟ <button class="acc-link" data-mode="signup">اعمل حساب</button>'}</div>`;
+        $('#gBtn').onclick = DQ.signInGoogle;
+      }
+      box.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { accMode = b.dataset.mode; accMsg = ''; renderAccount(); });
+      $('#accForm').onsubmit = async e => {
+        e.preventDefault(); const btn = e.target.querySelector('button[type=submit]'); btn.disabled = true;
+        const em = $('#a-em').value.trim().toLowerCase(); let r;
+        if (accMode === 'forgot') {
+          r = await sb.auth.resetPasswordForEmail(em, { redirectTo: back() });
+          btn.disabled = false; accMsg = r.error ? authError(r.error.message) : 'لو الإيميل عليه حساب هيوصلك لينك خلال دقيقة. بص في الـ Spam لو مالقيتهوش.'; return renderAccount();
+        }
+        const pw = $('#a-pw').value;
+        if (accMode === 'signup') {
+          r = await sb.auth.signUp({ email: em, password: pw, options: { data: { full_name: $('#a-name').value.trim() }, emailRedirectTo: back() } });
+          btn.disabled = false;
+          if (r.error) { accMsg = authError(r.error.message); return renderAccount(); }
+          if (!r.data.session) { accMode = 'login'; accMsg = 'بعتنالك إيميل تأكيد، افتحه وبعدين سجّل دخول.'; return renderAccount(); }
+        } else {
+          r = await sb.auth.signInWithPassword({ email: em, password: pw });
+          btn.disabled = false;
+          if (r.error) { accMsg = authError(r.error.message); return renderAccount(); }
+        }
+        accMsg = ''; DQ.toast('أهلًا ' + userName(r.data.user), 'ok');
+      };
+      return;
+    }
+    $('#accTitle').textContent = 'حسابي';
+    const nm = userName(u), av = (u.user_metadata && u.user_metadata.avatar_url) || '';
+    box.innerHTML = `<div class="acc-me">${av ? `<img src="${esc(av)}" alt="" referrerpolicy="no-referrer">` : `<span>${esc((nm[0] || '?').toUpperCase())}</span>`}
+        <div><b>${esc(nm)}</b><small class="en">${esc(u.email || '')}</small></div></div>
+      ${DQ.isAdmin ? `<a class="btn btn-amber acc-admin" href="admin.html">لوحة التحكم</a>` : ''}
+      <h4 class="acc-h">طلباتي</h4><div id="accOrders"><div class="acc-empty">جاري التحميل…</div></div>
+      <button class="btn btn-ghost acc-out" id="accOut">تسجيل خروج</button>`;
+    $('#accOut').onclick = async () => { await sb.auth.signOut(); DQ.toast('اتسجل الخروج'); };
+    const { data, error } = await sb.from('shop_orders').select('code,status,total,created_at,shop_order_items(name,qty,image)').eq('user_id', u.id).order('created_at', { ascending: false }).limit(50);
+    const el = $('#accOrders'); if (!el) return;
+    if (error) { el.innerHTML = '<div class="acc-empty">مش قادرين نجيب الطلبات دلوقتي.</div>'; return; }
+    if (!data.length) { el.innerHTML = '<div class="acc-empty">لسه مافيش طلبات. أي طلب تعمله وانت داخل هيظهر هنا.</div>'; return; }
+    el.innerHTML = data.map(o => `<div class="acc-order"><div class="ao-top"><code class="en">${esc(o.code)}</code><span class="ao-st st-${esc(o.status)}">${esc(STATUS[o.status] || o.status)}</span></div>
+      <div class="ao-items">${(o.shop_order_items || []).map(i => `<span>${i.image ? `<img src="${esc(i.image)}" alt="">` : ''}<em class="en">${esc(i.name)}</em> × ${i.qty}</span>`).join('')}</div>
+      <div class="ao-bot"><span>${new Date(o.created_at).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' })}</span><b class="en">${money(o.total)}</b></div></div>`).join('');
+  }
+  DQ.openAccount = (mode) => { if (mode) accMode = mode; accMsg = ''; openSheet('#accSheet'); renderAccount(); };
+  sb.auth.onAuthStateChange((ev, session) => {
+    if (ev === 'PASSWORD_RECOVERY') { setTimeout(() => { openSheet('#accSheet'); renderReset(); }, 300); return; }
+    setUser(session && session.user);
+  });
+  function renderReset() {
+    $('#accTitle').textContent = 'باسورد جديد';
+    $('#accBody').innerHTML = `<form class="acc-form" id="rsForm"><div class="field"><label for="r-pw">الباسورد الجديد</label><input id="r-pw" class="input en" type="password" minlength="6" required autocomplete="new-password" dir="ltr"></div><button class="btn btn-amber" type="submit">حفظ</button></form>`;
+    $('#rsForm').onsubmit = async e => { e.preventDefault(); const { error } = await sb.auth.updateUser({ password: $('#r-pw').value }); if (error) return DQ.toast(authError(error.message), 'err'); DQ.toast('اتغير الباسورد ✓', 'ok'); renderAccount(); };
+  }
 
   DQ.start = async (active, onReady) => {
     intro(); chrome(active); mouseFx();
