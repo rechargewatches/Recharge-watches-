@@ -317,6 +317,8 @@
   }
   const back = () => location.origin + location.pathname + location.search;
   DQ.signInGoogle = async () => {
+    const ok = await fetch(RC.url + '/auth/v1/settings', { headers: { apikey: RC.key } }).then(r => r.json()).then(j => j.external && j.external.google).catch(() => true);
+    if (!ok) return DQ.toast('الدخول بجوجل لسه مش متفعل، ادخل بالإيميل', 'err');
     const { error } = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: back() } });
     if (error) DQ.toast('الدخول بجوجل مش متاح دلوقتي', 'err');
   };
