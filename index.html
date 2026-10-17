@@ -28,8 +28,8 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Archivo:wght@400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/base.css?v=20261017g">
-<link rel="stylesheet" href="assets/store.css?v=20261017g">
+<link rel="stylesheet" href="assets/base.css?v=20261017i">
+<link rel="stylesheet" href="assets/store.css?v=20261017i">
 <style>
 
 /* ---------- desktop landing: scroll through the Q ---------- */
@@ -39,7 +39,7 @@
 .ld-grid{position:absolute;inset:0;background-image:linear-gradient(rgb(var(--accent-rgb)/.05) 1px,transparent 1px),linear-gradient(90deg,rgb(var(--accent-rgb)/.05) 1px,transparent 1px);background-size:64px 64px;mask-image:radial-gradient(ellipse at center,#000 20%,transparent 70%)}
 .ld-c{position:relative;display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:-4vh}
 .ld-slot{position:relative;width:min(26vh,230px);aspect-ratio:184/190}
-.ld-dial{position:absolute;left:50%;top:50%;width:100%;aspect-ratio:184/190;translate:-50% -50%;filter:drop-shadow(0 30px 60px rgba(0,0,0,.45))}
+.ld-dial{position:absolute;left:50%;top:48.42%;width:100%;aspect-ratio:184/190;translate:-50% -48.42%;transform-origin:50% 48.42%;filter:drop-shadow(0 30px 60px rgba(0,0,0,.45))}
 .ld-dial svg{width:100%;height:100%;display:block}
 .ld-time{display:flex;align-items:baseline;justify-content:center;gap:9px;margin-top:2px;color:var(--accent);direction:ltr;animation:ldFade 1.2s .4s both}
 .ld-time span{font:500 21px/1 var(--f-display);font-variant-numeric:lining-nums tabular-nums;letter-spacing:.06em}
@@ -159,8 +159,8 @@
 <div id="ftr"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="assets/config.js?v=20261017g"></script>
-<script src="assets/app.js?v=20261017g"></script>
+<script src="assets/config.js?v=20261017i"></script>
+<script src="assets/app.js?v=20261017i"></script>
 <script>
 const { discountPct, esc } = RC;
 const $ = s => document.querySelector(s);
@@ -196,13 +196,23 @@ const state = {}; // per section: { tab, all }
     if (reduce) return;
     const e = p * p;
     // resize the vector itself (not a bitmap scale) so it stays sharp at any zoom
-    dial.style.width = (100 * (1 + e * 16)) + '%'; dial.style.transform = `rotate(${p * 25}deg)`; dial.style.filter = p > .05 ? 'none' : '';
+    // first glide the watch to the middle of the screen, then zoom into it
+    // all in CSS px from offsets (works with the page zoom used on big screens)
+    let sx = 0, sy = 0, el = dial.parentNode; while (el && el !== stage) { sx += el.offsetLeft; sy += el.offsetTop; el = el.offsetParent; }
+    const sw = dial.parentNode.offsetWidth, sh = dial.parentNode.offsetHeight, nav = document.querySelector('.nav-bar');
+    const cx = stage.offsetWidth / 2, cy = ((nav ? nav.offsetHeight : 0) + stage.offsetHeight) / 2;
+    const g = clamp(p / .3), mv = g * g * (3 - 2 * g);
+    const dx = (cx - (sx + sw / 2)) * mv, dy = (cy - (sy + sh * 92 / 190)) * mv;
+    const z = clamp((p - .12) / .88), ez = z * z;
+    dial.style.width = (100 * (1 + ez * 16)) + '%';
+    dial.style.transform = `translate(${dx}px, ${dy}px) rotate(${p * 25}deg)`;
+    const ctr = `${cx}px ${cy}px`; ring.style.left = '50%'; ring.style.top = cy + 'px'; dial.style.filter = p > .05 ? 'none' : '';
     dial.style.opacity = 1 - clamp((p - .78) / .2);
     letters.forEach((el, i) => { const off = (i - 2) * p * 260; el.style.transform = `translate(${off}px, ${p * 40}px) rotate(${(i - 2) * p * 14}deg)`; el.style.opacity = 1 - clamp(p / .45); el.style.animation = p > .01 ? 'none' : ''; });
     fades.forEach(el => { if (p > .01) el.style.animation = 'none'; el.style.opacity = 1 - clamp(p / .2); el.style.translate = `0 ${p * -60}px`; });
     // a window opens in the middle of the watch and the store shows through it
     const q = clamp((p - .66) / .34), R = (1 - (1 - q) ** 2.2) * 125;
-    const m = R > 0 ? `radial-gradient(circle at 50% 46%, transparent ${R}vmax, #000 calc(${R}vmax + 1px))` : 'none';
+    const m = R > 0 ? `radial-gradient(circle at ${ctr}, transparent ${R}vmax, #000 calc(${R}vmax + 1px))` : 'none';
     stage.style.webkitMaskImage = m; stage.style.maskImage = m;
     stage.style.pointerEvents = p > .85 ? 'none' : '';
     ring.style.width = ring.style.height = (R * 2) + 'vmax'; ring.style.opacity = R > 0 && R < 110 && p < 1 ? 1 : 0;
