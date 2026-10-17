@@ -1,3 +1,4 @@
+html,body{overflow-x:clip}
 /* DAQQA Watches — storefront shared styles (header, footer, cards, cart) */
 .wrap{max-width:1240px;margin:0 auto;padding-left:max(24px,env(safe-area-inset-left));padding-right:max(24px,env(safe-area-inset-right))}
 #hdr{display:contents}
@@ -232,18 +233,52 @@
 @keyframes wind{from{transform:rotate(0)}to{transform:rotate(720deg)}}
 @keyframes windM{from{transform:rotate(0)}to{transform:rotate(60deg)}}
 
-/* ---------- mouse: ring + card tilt ---------- */
-.cursor-ring{position:fixed;top:0;left:0;z-index:999;width:34px;height:34px;margin:-17px 0 0 -17px;border:1px solid var(--accent);border-radius:50%;pointer-events:none;opacity:0;transition:width .3s,height .3s,margin .3s,opacity .3s,background .3s,border-color .3s}
-.cursor-ring.on{opacity:.75}
-.cursor-ring.big{width:64px;height:64px;margin:-32px 0 0 -32px;background:rgb(var(--accent-rgb)/.12);border-color:transparent}
-.cursor-ring.txt{width:4px;height:28px;margin:-14px 0 0 -2px;border-radius:2px;background:var(--accent);border-color:transparent}
-.cursor-ring.press{width:24px;height:24px;margin:-12px 0 0 -12px}
-.card.reveal.in{transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .45s cubic-bezier(.2,.7,.2,1),clip-path 1s cubic-bezier(.77,0,.18,1),border-color .3s,box-shadow .4s}
-.card.reveal.in:hover{transform:translateY(-6px)}
-.card.tilting{transition:transform .12s linear,border-color .3s,box-shadow .4s!important;will-change:transform}
-.card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(circle at var(--gx,50%) var(--gy,0%),rgba(255,255,255,.14),transparent 45%);opacity:0;transition:opacity .3s;z-index:2}
+/* ---------- mouse: ring, dot, section light, magnetic, card focus ---------- */
+.cursor-ring{position:fixed;top:0;left:0;z-index:999;width:44px;height:44px;margin:-22px 0 0 -22px;border:1.5px solid var(--accent);border-radius:50%;pointer-events:none;opacity:0;display:grid;place-items:center;transition:width .35s cubic-bezier(.2,.8,.2,1),height .35s cubic-bezier(.2,.8,.2,1),margin .35s cubic-bezier(.2,.8,.2,1),opacity .3s,background .3s,border-color .3s}
+.cursor-ring span{font:700 13px var(--f-ar);color:var(--bg);opacity:0;transform:scale(.5);transition:opacity .25s,transform .35s cubic-bezier(.3,1.6,.5,1)}
+.cursor-ring.on{opacity:1}
+.cursor-ring.big{width:72px;height:72px;margin:-36px 0 0 -36px;background:rgb(var(--accent-rgb)/.16);border-color:rgb(var(--accent-rgb)/.6)}
+.cursor-ring.view{width:96px;height:96px;margin:-48px 0 0 -48px;background:var(--accent);border-color:var(--accent);box-shadow:0 10px 40px -8px rgb(var(--accent-rgb)/.6)}
+.cursor-ring.view span{opacity:1;transform:none}
+.cursor-ring.txt{width:3px;height:30px;margin:-15px 0 0 -1.5px;border-radius:2px;background:var(--accent);border-color:transparent}
+.cursor-ring.press{width:30px;height:30px;margin:-15px 0 0 -15px}
+.cursor-ring.view.press{width:84px;height:84px;margin:-42px 0 0 -42px}
+.cursor-dot{position:fixed;top:0;left:0;z-index:1000;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:var(--accent);pointer-events:none;opacity:0;transition:opacity .3s}
+.cursor-dot.on{opacity:1}
+.fx .cursor-ring.view~.cursor-dot{opacity:0}
+/* light that follows the mouse on section backgrounds */
+[data-glow]{position:relative;isolation:isolate}
+[data-glow]::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .5s;
+  background:radial-gradient(560px circle at var(--gx,50%) var(--gy,50%),rgb(var(--accent-rgb)/.26),rgb(var(--accent-rgb)/.08) 35%,transparent 65%)}
+[data-glow].glowing::before{opacity:1}
+.strip[data-glow]::before{background:radial-gradient(520px circle at var(--gx,50%) var(--gy,50%),rgba(90,59,37,.16),rgba(168,121,79,.06) 40%,transparent 65%)}
+[data-glow]>.wrap,[data-glow]>.strip-in{position:relative;z-index:1}
+[data-glow]>.bg{z-index:-1}
+/* magnetic buttons */
+.mag{transition:translate .15s ease-out,transform .25s cubic-bezier(.3,1.6,.5,1),background .25s,color .25s,border-color .25s!important}
+/* cards: stronger focus — lift, zoom, glare, label, siblings dim */
+.card.reveal.in{transition:opacity .5s,filter .5s,transform .45s cubic-bezier(.2,.7,.2,1),clip-path 1s cubic-bezier(.77,0,.18,1),border-color .3s,box-shadow .4s}
+.card.reveal.in:hover{transform:translateY(-10px) scale(1.02)}
+.card:hover{box-shadow:0 34px 70px -28px rgba(0,0,0,.65),0 0 0 1px var(--accent-2)}
+.strip .card:hover{box-shadow:none}
+.strip .card:hover .ph{box-shadow:0 30px 60px -22px rgba(24,17,10,.55)}
+.card.tilting{transition:transform .1s linear,opacity .5s,filter .5s,border-color .3s,box-shadow .4s!important;will-change:transform;z-index:3}
+.card:hover .ph img{transform:scale(1.12)}
+.card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(circle at var(--gx,50%) var(--gy,0%),rgba(255,255,255,.22),transparent 45%);opacity:0;transition:opacity .3s;z-index:2}
 .card.tilting::after{opacity:1}
+.card .ph::after{content:"عرض المنتج ←";position:absolute;inset:auto 12px 12px 12px;height:42px;border-radius:999px;display:grid;place-items:center;background:rgb(var(--bg-rgb)/.82);backdrop-filter:blur(8px);color:var(--ink);font:600 13px var(--f-ar);transform:translateY(70px);opacity:0;transition:transform .45s cubic-bezier(.2,.8,.2,1),opacity .3s}
+.card:hover .ph::after{transform:none;opacity:1}
+.strip .card .ph::after{background:rgba(24,17,10,.78);color:#F5F0E8}
+@media (hover:hover) and (pointer:fine){
+  .grid:has(.card:hover) .card:not(:hover){opacity:.5;filter:saturate(.5) blur(.4px)}
+  .links a{transition:color .2s,transform .3s}
+  .links a:hover{transform:translateY(-2px)}
+}
 .btn,.icon-btn,.chip,.tabs button,.view-all,.btn-line{transition:transform .25s cubic-bezier(.3,1.6,.5,1),background .25s,color .25s,border-color .25s}
 .btn:hover,.icon-btn:hover,.btn-line:hover{transform:translateY(-2px)}
 .btn:active,.icon-btn:active{transform:scale(.94)}
-@media (prefers-reduced-motion:reduce){.intro{display:none}.cursor-ring{display:none}}
+.btn-line,.btn-amber,.btn-primary{position:relative;overflow:hidden}
+.btn-line::after,.btn-amber::after,.btn-primary::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);transform:skewX(-20deg);transition:left .7s cubic-bezier(.2,.7,.2,1);pointer-events:none}
+.btn-line:hover::after,.btn-amber:hover::after,.btn-primary:hover::after{left:130%}
+@media (prefers-reduced-motion:reduce){.intro{display:none}.cursor-ring,.cursor-dot{display:none}.card .ph::after{display:none}}
+

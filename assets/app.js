@@ -145,8 +145,9 @@
   }
   /* ---------- intro: the Q dial winds up, then the doors open (once per visit) ---------- */
   function intro() {
+    if (window.DQ_NO_INTRO) return;
     let seen = false; try { seen = sessionStorage.getItem('dq-intro') === '1'; sessionStorage.setItem('dq-intro', '1'); } catch (e) {}
-    if (seen || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (window.DQ_NO_INTRO || seen || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const el = document.createElement('div'); el.className = 'intro'; el.setAttribute('aria-hidden', 'true');
     el.innerHTML = `<div class="door l"></div><div class="door r"></div><div class="intro-c"><div class="m">${RC.dial()}</div><b>DAQQA</b><small>ACCESSORIES</small></div>`;
     document.body.appendChild(el); document.documentElement.classList.add('intro-on');
@@ -157,20 +158,40 @@
   /* ---------- mouse: trailing ring + card tilt (fine pointers only) ---------- */
   function mouseFx() {
     if (!matchMedia('(hover: hover) and (pointer: fine)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const ring = document.createElement('div'); ring.className = 'cursor-ring'; ring.setAttribute('aria-hidden', 'true'); document.body.appendChild(ring);
-    let x = -100, y = -100, rx = x, ry = y;
-    addEventListener('pointermove', e => { x = e.clientX; y = e.clientY; ring.classList.add('on');
-      const t = e.target.closest && e.target.closest('a, button, .card, [role=tab], select, input, textarea, label');
-      ring.classList.toggle('big', !!t && !t.matches('input, textarea, select')); ring.classList.toggle('txt', !!t && t.matches('input, textarea')); }, { passive: true });
-    document.addEventListener('pointerleave', () => ring.classList.remove('on'));
-    document.addEventListener('pointerdown', () => ring.classList.add('press')); document.addEventListener('pointerup', () => ring.classList.remove('press'));
-    (function loop() { rx += (x - rx) * .2; ry += (y - ry) * .2; ring.style.transform = `translate(${rx}px, ${ry}px)`; requestAnimationFrame(loop); })();
-    document.addEventListener('pointermove', e => {
-      const c = e.target.closest && e.target.closest('.card.in'); document.querySelectorAll('.card.tilting').forEach(o => { if (o !== c) { o.classList.remove('tilting'); o.style.transform = ''; } });
-      if (!c) return; const r = c.getBoundingClientRect(), px = (e.clientX - r.left) / r.width - .5, py = (e.clientY - r.top) / r.height - .5;
-      c.classList.add('tilting'); c.style.transform = `perspective(900px) rotateX(${(-py * 7).toFixed(2)}deg) rotateY(${(px * 9).toFixed(2)}deg) translateY(-6px)`;
-      c.style.setProperty('--gx', (px + .5) * 100 + '%'); c.style.setProperty('--gy', (py + .5) * 100 + '%');
+    document.documentElement.classList.add('fx');
+    const ring = document.createElement('div'); ring.className = 'cursor-ring'; ring.setAttribute('aria-hidden', 'true'); ring.innerHTML = '<span>عرض</span>';
+    const dot = document.createElement('div'); dot.className = 'cursor-dot'; dot.setAttribute('aria-hidden', 'true');
+    document.body.append(ring, dot);
+    let x = -200, y = -200, rx = x, ry = y, glowEl = null, magEl = null;
+    const MAG = '.btn, .btn-line, .icon-btn, .add, .fav, .chip, .view-all';
+    addEventListener('pointermove', e => {
+      x = e.clientX; y = e.clientY; ring.classList.add('on'); dot.classList.add('on');
+      const t = e.target.closest ? e.target : document.body;
+      const card = t.closest('.card'), act = t.closest('a, button, select, [role=tab], label'), txt = t.closest('input, textarea');
+      ring.classList.toggle('view', !!card && !t.closest('.add, .fav'));
+      ring.classList.toggle('big', !card && !!act || (!!card && !!t.closest('.add, .fav')));
+      ring.classList.toggle('txt', !!txt);
+      // light that follows the mouse across each section background
+      const g = t.closest('[data-glow]');
+      if (glowEl && glowEl !== g) glowEl.classList.remove('glowing');
+      if (g) { const r = g.getBoundingClientRect(); g.style.setProperty('--gx', (x - r.left) + 'px'); g.style.setProperty('--gy', (y - r.top) + 'px'); g.classList.add('glowing'); }
+      glowEl = g;
+      // magnetic buttons
+      const m = t.closest(MAG);
+      if (magEl && magEl !== m) { magEl.style.translate = ''; magEl.classList.remove('mag'); }
+      if (m) { const r = m.getBoundingClientRect(); m.classList.add('mag'); m.style.translate = `${((x - r.left) / r.width - .5) * 10}px ${((y - r.top) / r.height - .5) * 8}px`; }
+      magEl = m;
+      // card tilt + glare
+      document.querySelectorAll('.card.tilting').forEach(o => { if (o !== card) { o.classList.remove('tilting'); o.style.transform = ''; } });
+      if (card && card.classList.contains('in')) {
+        const r = card.getBoundingClientRect(), px = (x - r.left) / r.width - .5, py = (y - r.top) / r.height - .5;
+        card.classList.add('tilting'); card.style.transform = `perspective(900px) rotateX(${(-py * 9).toFixed(2)}deg) rotateY(${(px * 11).toFixed(2)}deg) translateY(-10px) scale(1.03)`;
+        card.style.setProperty('--gx', (px + .5) * 100 + '%'); card.style.setProperty('--gy', (py + .5) * 100 + '%');
+      }
     }, { passive: true });
+    document.addEventListener('pointerleave', () => { ring.classList.remove('on'); dot.classList.remove('on'); });
+    document.addEventListener('pointerdown', () => ring.classList.add('press')); document.addEventListener('pointerup', () => ring.classList.remove('press'));
+    (function loop() { rx += (x - rx) * .18; ry += (y - ry) * .18; ring.style.transform = `translate(${rx}px, ${ry}px)`; dot.style.transform = `translate(${x}px, ${y}px)`; requestAnimationFrame(loop); })();
   }
   function openSheet(id) { DQ.closeAll(); $(id).classList.add('on'); document.body.style.overflow = 'hidden'; }
   function renderSearch(q) {
