@@ -28,8 +28,8 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Archivo:wght@400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/base.css?v=20261017p">
-<link rel="stylesheet" href="assets/store.css?v=20261017p">
+<link rel="stylesheet" href="assets/base.css?v=20261017r">
+<link rel="stylesheet" href="assets/store.css?v=20261017r">
 <style>
 
 /* ---------- desktop landing: scroll through the Q ---------- */
@@ -177,8 +177,8 @@
 <div id="ftr"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="assets/config.js?v=20261017p"></script>
-<script src="assets/app.js?v=20261017p"></script>
+<script src="assets/config.js?v=20261017r"></script>
+<script src="assets/app.js?v=20261017r"></script>
 <script>
 const { discountPct, esc } = RC;
 const $ = s => document.querySelector(s);
@@ -253,6 +253,24 @@ const state = {}; // per section: { tab, all }
     if (p >= 1 && pv < 1) { pv = 1; render(1); }
   }
   addEventListener('scroll', onScroll, { passive: true }); onScroll(); addEventListener('resize', () => { geo = null; onScroll(); }); const _s = document.getElementById('sections'); if (_s && window.ResizeObserver) new ResizeObserver(onScroll).observe(_s); requestAnimationFrame(frame);
+  // links to a section (#glasses, #watches-shop …): the store sits under the intro, so scroll past it to the section
+  window.DQ_goto = (id, smooth = true) => {
+    const t = document.getElementById(id), secs = document.getElementById('sections');
+    if (!t || !document.body.contains(L) || !secs.contains(t)) return false;
+    const r = L.getBoundingClientRect(), end = scrollY + r.top + r.height - innerHeight;   // scroll where the store is released
+    const nav = document.querySelector('.nav-bar'), navB = nav ? nav.getBoundingClientRect().height : 0;
+    const off = t.getBoundingClientRect().top - secs.getBoundingClientRect().top;
+    const Z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+    scrollTo({ top: Math.max(0, end + off + (navB - (nav ? nav.offsetHeight * Z : 0))), behavior: smooth ? 'smooth' : 'auto' });
+    return true;
+  };
+  addEventListener('hashchange', () => { const id = decodeURIComponent(location.hash.slice(1)); if (id) DQ_goto(id); });
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[href*="#"]'); if (!a || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey) return;
+    const u = new URL(a.getAttribute('href'), location.href);
+    const np = x => x.replace(/index\.html$/, ''); if (np(u.pathname) !== np(location.pathname) || !u.hash) return;
+    if (DQ_goto(decodeURIComponent(u.hash.slice(1)))) { e.preventDefault(); history.replaceState(null, '', u.hash); }
+  });
   L.addEventListener('pointermove', e => { L.style.setProperty('--mx', e.clientX / innerWidth * 100 + '%'); L.style.setProperty('--my', e.clientY / innerHeight * 100 + '%'); });
 })();
 
@@ -314,7 +332,7 @@ function build() {
   }).join('');
   live.forEach(renderStrip);
   const h = location.hash.slice(1);
-  if (h && document.getElementById(h)) setTimeout(() => document.getElementById(h).scrollIntoView(), 60);
+  if (h && document.getElementById(h)) { const go = () => { if (!(window.DQ_goto && DQ_goto(h, false))) document.getElementById(h).scrollIntoView(); }; setTimeout(go, 80); setTimeout(go, 700); }
   // product list for Google
   const base = location.origin + location.pathname.replace(/index\.html$/, '');
   const ld = { '@context': 'https://schema.org', '@type': 'ItemList', name: 'DAQQA Collection', itemListElement: DQ.products.map((p, i) => ({ '@type': 'ListItem', position: i + 1, url: base + RC.productUrl(p), name: p.name })) };

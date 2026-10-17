@@ -83,7 +83,7 @@
   /* ---------- chrome: header, sheets, footer, drawer ---------- */
   function chrome(active) {
     const nav = [['./', 'الرئيسية', 'home'], ['./#watches', 'الساعات', 'watches'], ['./#glasses', 'النضارات', 'glasses'], ['./#accessories', 'الاكسسوارات', 'accessories']];
-    $('#hdr').innerHTML = `<div class="announce" id="announce"></div>
+    $('#hdr').innerHTML = `
       <header class="nav-bar"><div class="wrap nav">
         <a href="./" class="brand" aria-label="DAQQA — الرئيسية"><span class="m">${RC.logo()}</span><span class="wm"><b>DAQQA</b><small>ACCESSORIES</small></span></a>
         <nav class="links" aria-label="القائمة">${nav.map(([h, l, k]) => `<a href="${h}" data-kind="${k}" class="${k === active ? 'on' : ''}">${l}</a>`).join('')}</nav>
@@ -211,7 +211,7 @@
     ]);
     if (p.error) throw p.error;
     DQ.products = p.data || []; DQ.settings = s.data || {};
-    $('#announce').textContent = DQ.settings.announcement || '';
+
     if (DQ.wa()) $('#ftWa').innerHTML = `<a href="https://wa.me/${DQ.wa()}" target="_blank" rel="noopener">${esc(DQ.settings.whatsapp)}</a>`;
     renderCart(); renderSearch(''); syncKinds(); renderFavs();
   };
