@@ -28,8 +28,8 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Archivo:wght@400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/base.css?v=20261017s">
-<link rel="stylesheet" href="assets/store.css?v=20261017s">
+<link rel="stylesheet" href="assets/base.css?v=20261017t">
+<link rel="stylesheet" href="assets/store.css?v=20261017t">
 <style>
 
 /* ---------- desktop landing: scroll through the Q ---------- */
@@ -51,6 +51,7 @@
 .ld-word span:nth-child(2){animation-delay:.08s}.ld-word span:nth-child(3){animation-delay:.16s}.ld-word span:nth-child(4){animation-delay:.24s}.ld-word span:nth-child(5){animation-delay:.32s}
 @keyframes ldDrop{from{opacity:0;transform:translateY(-60px) rotateX(70deg)}to{opacity:1;transform:none}}
 .ld-sub{font:600 13px var(--f-ui);letter-spacing:.9em;color:var(--accent);padding-left:.9em;animation:ldFade 1.2s .5s both}
+.ld-ar{font:700 clamp(34px,3.4vw,48px)/1.1 'Amiri',var(--f-ar);color:var(--accent);margin-top:2px;animation:ldFade 1.2s .6s both}
 .ld-tag{font:700 24px 'Amiri',var(--f-ar);color:var(--muted);animation:ldFade 1.2s .7s both}
 @keyframes ldFade{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 .ld-fade{will-change:opacity,transform}
@@ -171,15 +172,15 @@
 <div id="hdr"></div>
 <section class="landing" id="landing" aria-label="DAQQA"><div class="ld-stick"><div class="ld-bg"></div><div class="ld-grid"></div>
   <span class="ld-side l en ld-fade">PRECISION IN EVERY TICK</span><span class="ld-side r en ld-fade">EST. 2026 · CAIRO</span>
-  <div class="ld-c"><div class="ld-slot"><div class="ld-dial" id="ldDial"></div></div><div class="ld-time en ld-fade" aria-live="off"><span id="ldClock">--:--:--</span><b id="ldAP">PM</b><i>CAIRO</i></div><h1 class="ld-word en" id="ldWord" aria-label="DAQQA"><span>D</span><span>A</span><span>Q</span><span>Q</span><span>A</span></h1><div class="ld-sub en ld-fade">ACCESSORIES</div><div class="ld-tag ld-fade">ساعات · نضارات · اكسسوارات</div></div>
+  <div class="ld-c"><div class="ld-slot"><div class="ld-dial" id="ldDial"></div></div><div class="ld-time en ld-fade" aria-live="off"><span id="ldClock">--:--:--</span><b id="ldAP">PM</b><i>CAIRO</i></div><h1 class="ld-word en" id="ldWord" aria-label="DAQQA"><span>D</span><span>A</span><span>Q</span><span>Q</span><span>A</span></h1><div class="ld-sub en ld-fade">ACCESSORIES</div><div class="ld-ar ld-fade" lang="ar">دقّة</div><div class="ld-tag ld-fade">ساعات · نضارات · اكسسوارات</div></div>
   <div class="ld-scroll ld-fade"><span class="mouse"><i></i></span><b>اسكرول لتحت</b><small class="en">SCROLL</small></div>
   </div><div class="ld-ring" id="ldRing"></div></section>
 <main id="sections"><div class="none"><div class="m skeleton" style="border-radius:50%"></div>جاري التحميل…</div></main>
 <div id="ftr"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="assets/config.js?v=20261017s"></script>
-<script src="assets/app.js?v=20261017s"></script>
+<script src="assets/config.js?v=20261017t"></script>
+<script src="assets/app.js?v=20261017t"></script>
 <script>
 const { discountPct, esc } = RC;
 const $ = s => document.querySelector(s);
