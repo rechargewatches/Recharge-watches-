@@ -28,8 +28,8 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Archivo:wght@400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/base.css?v=20261017l">
-<link rel="stylesheet" href="assets/store.css?v=20261017l">
+<link rel="stylesheet" href="assets/base.css?v=20261017m">
+<link rel="stylesheet" href="assets/store.css?v=20261017m">
 <style>
 
 /* ---------- desktop landing: scroll through the Q ---------- */
@@ -159,8 +159,8 @@
 <div id="ftr"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="assets/config.js?v=20261017l"></script>
-<script src="assets/app.js?v=20261017l"></script>
+<script src="assets/config.js?v=20261017m"></script>
+<script src="assets/app.js?v=20261017m"></script>
 <script>
 const { discountPct, esc } = RC;
 const $ = s => document.querySelector(s);
@@ -182,53 +182,59 @@ const state = {}; // per section: { tab, all }
   const CF = new Intl.DateTimeFormat('en-GB', { timeZone: 'Africa/Cairo', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
   const cairo = d => { const o = {}; CF.formatToParts(d).forEach(x => o[x.type] = +x.value); return { h: o.hour % 24, m: o.minute, s: o.second }; };
   const clk = document.getElementById('ldClock'), ap = document.getElementById('ldAP'); let lastS = -1;
+  let pv = 0, geo = null;
+  // geometry is measured once (and on resize) instead of every frame
+  function measure() {
+    let sx = 0, sy = 0, el = dial.parentNode; while (el && el !== stage) { sx += el.offsetLeft; sy += el.offsetTop; el = el.offsetParent; }
+    const nav = document.querySelector('.nav-bar'), sw = dial.parentNode.offsetWidth, sh = dial.parentNode.offsetHeight;
+    const cx = stage.offsetWidth / 2, cy = ((nav ? nav.offsetHeight : 0) + stage.offsetHeight) / 2;
+    geo = { cx, cy, ox: cx - (sx + sw / 2), oy: cy - (sy + sh * 92 / 190) };
+    ring.style.left = '50%'; ring.style.top = cy + 'px';
+  }
+  // visuals follow a smoothed copy of the scroll so mouse-wheel steps don't shake
+  function render(v) {
+    if (!geo) measure();
+    const g = clamp(v / .28), mv = 1 - (1 - g) ** 3;
+    const z = clamp((v - .3) / .7), sc = 1 + z * z * 16;
+    // scale without will-change: the browser repaints the vector at each size, so it stays sharp
+    dial.style.transform = `translate(${geo.ox * mv}px, ${geo.oy * mv}px) rotate(${v * 25}deg) scale(${sc})`;
+    dial.style.filter = v > .05 ? 'none' : '';
+    dial.style.opacity = 1 - clamp((v - .82) / .14);
+    letters.forEach((el, i) => { el.style.transform = `translate(${(i - 2) * v * 260}px, ${v * 40}px) rotate(${(i - 2) * v * 14}deg)`; el.style.opacity = 1 - clamp(v / .22); if (v > .01) el.style.animation = 'none'; });
+    fades.forEach(el => { if (v > .01) el.style.animation = 'none'; el.style.opacity = 1 - clamp(v / .07); el.style.translate = `0 ${v * -60}px`; });
+    // a window opens in the middle of the watch and the store shows through it
+    const q = clamp((v - .72) / .24), R = q ** 1.6 * 125;
+    const m = R > 0 ? `radial-gradient(circle at ${geo.cx}px ${geo.cy}px, transparent ${R}vmax, #000 calc(${R}vmax + 1px))` : 'none';
+    stage.style.webkitMaskImage = m; stage.style.maskImage = m;
+    stage.style.pointerEvents = v > .85 ? 'none' : '';
+    ring.style.width = ring.style.height = (R * 2) + 'vmax'; ring.style.opacity = R > 0 && R < 110 && p < 1 ? 1 : 0;
+  }
   function frame() {
     const d = new Date(), t = cairo(d), sec = t.s + d.getMilliseconds() / 1000, min = t.m + sec / 60, hr = (t.h % 12) + min / 60;
     if (t.s !== lastS) { lastS = t.s; const h12 = t.h % 12 || 12; clk.textContent = `${String(h12).padStart(2, '0')}:${String(t.m).padStart(2, '0')}:${String(t.s).padStart(2, '0')}`; ap.textContent = t.h < 12 ? 'AM' : 'PM'; }
-    hand('dq-s').style.transform = `rotate(${sec * 6 + p * 1080}deg)`;
-    hand('dq-m').style.transform = `rotate(${min * 6 + p * 540}deg)`;
-    hand('dq-h').style.transform = `rotate(${hr * 30 + p * 90}deg)`;
+    if (!reduce && Math.abs(p - pv) > .0003) { pv += (p - pv) * .16; if (Math.abs(p - pv) < .0003) pv = p; render(pv); }
+    hand('dq-s').style.transform = `rotate(${sec * 6 + pv * 1080}deg)`;
+    hand('dq-m').style.transform = `rotate(${min * 6 + pv * 540}deg)`;
+    hand('dq-h').style.transform = `rotate(${hr * 30 + pv * 90}deg)`;
     requestAnimationFrame(frame);
   }
+  // scroll only handles layout: progress + holding the store under the header
   function onScroll() {
     // size the stage from the real window height (the page is zoomed on big screens, so vh would overflow)
     const Z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1, vhc = innerHeight / Z;
-    if (Math.abs(stage.offsetHeight - vhc) > 1) { stage.style.height = vhc + 'px'; L.style.height = vhc * 3.2 + 'px'; }
+    if (Math.abs(stage.offsetHeight - vhc) > 1) { stage.style.height = vhc + 'px'; L.style.height = vhc * 3.2 + 'px'; geo = null; }
     const r = L.getBoundingClientRect(), span = r.height - innerHeight;
     p = clamp(-r.top / span);
-    if (reduce) return;
-    const e = p * p;
-    // resize the vector itself (not a bitmap scale) so it stays sharp at any zoom
-    // first glide the watch to the middle of the screen, then zoom into it
-    // all in CSS px from offsets (works with the page zoom used on big screens)
-    let sx = 0, sy = 0, el = dial.parentNode; while (el && el !== stage) { sx += el.offsetLeft; sy += el.offsetTop; el = el.offsetParent; }
-    const sw = dial.parentNode.offsetWidth, sh = dial.parentNode.offsetHeight, nav = document.querySelector('.nav-bar');
-    const cx = stage.offsetWidth / 2, cy = ((nav ? nav.offsetHeight : 0) + stage.offsetHeight) / 2;
-    const g = clamp(p / .28), mv = 1 - (1 - g) ** 3;
-    const dx = (cx - (sx + sw / 2)) * mv, dy = (cy - (sy + sh * 92 / 190)) * mv;
-    const z = clamp((p - .3) / .7), ez = z * z;
-    dial.style.width = (100 * (1 + ez * 16)) + '%';
-    dial.style.transform = `translate(${dx}px, ${dy}px) rotate(${p * 25}deg)`;
-    const ctr = `${cx}px ${cy}px`; ring.style.left = '50%'; ring.style.top = cy + 'px'; dial.style.filter = p > .05 ? 'none' : '';
-    dial.style.opacity = 1 - clamp((p - .82) / .16);
-    letters.forEach((el, i) => { const off = (i - 2) * p * 260; el.style.transform = `translate(${off}px, ${p * 40}px) rotate(${(i - 2) * p * 14}deg)`; el.style.opacity = 1 - clamp(p / .22); el.style.animation = p > .01 ? 'none' : ''; });
-    fades.forEach(el => { if (p > .01) el.style.animation = 'none'; el.style.opacity = 1 - clamp(p / .07); el.style.translate = `0 ${p * -60}px`; });
-    // a window opens in the middle of the watch and the store shows through it
-    const q = clamp((p - .72) / .26), R = q ** 1.6 * 125;
-    const m = R > 0 ? `radial-gradient(circle at ${ctr}, transparent ${R}vmax, #000 calc(${R}vmax + 1px))` : 'none';
-    stage.style.webkitMaskImage = m; stage.style.maskImage = m;
-    stage.style.pointerEvents = p > .85 ? 'none' : '';
-    // the store waits right under the header while the window opens (held with position:fixed,
-    // so it never lags behind the scroll), then is released exactly where it already sits
-    const secs = document.getElementById('sections'), navH = nav ? nav.offsetHeight : 0, fix = p < 1;
+    const nav = document.querySelector('.nav-bar'), secs = document.getElementById('sections'), navH = nav ? nav.offsetHeight : 0, fix = p < 1;
     if (secs) {
       if (fix !== held) { held = fix; Object.assign(secs.style, fix ? { position: 'fixed', left: '0', right: '0', zIndex: '1' } : { position: '', top: '', left: '', right: '', zIndex: '' }); }
       if (fix) secs.style.top = navH + 'px';
       L.style.marginBottom = (-(stage.offsetHeight - navH) + (fix ? secs.offsetHeight : 0)) + 'px';
     }
-    ring.style.width = ring.style.height = (R * 2) + 'vmax'; ring.style.opacity = R > 0 && R < 110 && p < 1 ? 1 : 0;
+    // once the store is released the intro must already be fully open
+    if (p >= 1 && pv < 1) { pv = 1; render(1); }
   }
-  addEventListener('scroll', onScroll, { passive: true }); onScroll(); addEventListener('resize', onScroll); const _s = document.getElementById('sections'); if (_s && window.ResizeObserver) new ResizeObserver(onScroll).observe(_s); requestAnimationFrame(frame);
+  addEventListener('scroll', onScroll, { passive: true }); onScroll(); addEventListener('resize', () => { geo = null; onScroll(); }); const _s = document.getElementById('sections'); if (_s && window.ResizeObserver) new ResizeObserver(onScroll).observe(_s); requestAnimationFrame(frame);
   L.addEventListener('pointermove', e => { L.style.setProperty('--mx', e.clientX / innerWidth * 100 + '%'); L.style.setProperty('--my', e.clientY / innerHeight * 100 + '%'); });
 })();
 
