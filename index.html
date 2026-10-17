@@ -28,8 +28,8 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Archivo:wght@400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/base.css?v=20261017m">
-<link rel="stylesheet" href="assets/store.css?v=20261017m">
+<link rel="stylesheet" href="assets/base.css?v=20261017n">
+<link rel="stylesheet" href="assets/store.css?v=20261017n">
 <style>
 
 /* ---------- desktop landing: scroll through the Q ---------- */
@@ -85,10 +85,27 @@
 /* banner without a section photo: text + framed product */
 .banner.framed{background:radial-gradient(ellipse at 22% 50%,rgb(var(--accent-rgb)/.12),transparent 55%),var(--hero)}
 .bn-grid{display:grid;grid-template-columns:1fr minmax(0,440px);gap:56px;align-items:center}
-.frame{position:relative;display:block;aspect-ratio:4/5;border-radius:220px 220px 18px 18px;overflow:hidden;border:1px solid var(--line);box-shadow:0 40px 80px -30px rgba(0,0,0,.7)}
-.frame img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s cubic-bezier(.2,.7,.2,1)}
-.frame:hover img{transform:scale(1.05)}
-.frame span{position:absolute;inset:auto 0 0 0;padding:40px 18px 16px;background:linear-gradient(0deg,rgba(24,17,10,.85),transparent);font:500 15px var(--f-display);color:#F5F0E8;text-align:center}
+.frame{position:relative;display:block;aspect-ratio:4/5;isolation:isolate;--tl:0deg}
+.frame::before{content:"";position:absolute;inset:6% -6% -4% 8%;border-radius:36px;border:1px solid rgb(var(--accent-rgb)/.55);transform:rotate(-5deg);transition:transform .9s cubic-bezier(.2,.7,.2,1);z-index:-1}
+.frame::after{content:"";position:absolute;width:78%;aspect-ratio:1;left:-14%;top:-8%;border-radius:50%;background:radial-gradient(circle,rgb(var(--accent-rgb)/.28),transparent 68%);z-index:-2;filter:blur(6px)}
+.fr-card{position:absolute;inset:0;border-radius:32px;overflow:hidden;background:var(--strip-bg);box-shadow:0 50px 90px -40px rgba(0,0,0,.55),0 0 0 1px rgb(var(--accent-rgb)/.18);transform:rotate(2.5deg);transition:transform .9s cubic-bezier(.2,.7,.2,1),box-shadow .9s}
+.fr-card img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s cubic-bezier(.2,.7,.2,1)}
+.fr-tag{position:absolute;top:18px;left:18px;z-index:2;font:600 10px var(--f-ui);letter-spacing:.3em;color:var(--strip-ink);background:rgb(255 255 255/.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:8px 12px;border-radius:999px}
+.fr-cap{position:absolute;left:-7%;bottom:7%;z-index:3;display:flex;align-items:center;gap:14px;padding:10px 10px 10px 20px;border-radius:999px;background:rgb(var(--bg-rgb)/.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgb(var(--accent-rgb)/.3);box-shadow:0 20px 40px -18px rgba(0,0,0,.5);color:var(--ink);max-width:86%;transition:transform .9s cubic-bezier(.2,.7,.2,1)}
+.fr-cap b{font:500 16px/1.2 var(--f-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fr-cap small{display:block;font:700 12px var(--f-ui);color:var(--accent);margin-top:2px}
+.fr-cap i{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--bg);transition:transform .5s}
+.fr-cap i svg{width:16px;height:16px}
+.frame:hover .fr-card{transform:rotate(0) translateY(-6px);box-shadow:0 60px 100px -40px rgba(0,0,0,.6),0 0 0 1px rgb(var(--accent-rgb)/.4)}
+.frame:hover .fr-card img{transform:scale(1.06)}
+.frame:hover::before{transform:rotate(-8deg) translate(10px,6px)}
+.frame:hover .fr-cap{transform:translateX(-8px)}
+.frame:hover .fr-cap i{transform:rotate(-45deg)}
+.frame.op-arch{clip-path:none}
+.frame.op-arch .fr-card{clip-path:inset(100% 0 0 0 round 32px);transition:clip-path 1.3s cubic-bezier(.2,.7,.2,1) .15s,transform .9s cubic-bezier(.2,.7,.2,1),box-shadow .9s}
+.frame.op-arch.in .fr-card{clip-path:inset(0 0 0 0 round 32px)}
+.frame.op-arch .fr-cap,.frame.op-arch::before{opacity:0;translate:0 20px;transition:opacity .8s .9s,translate .8s .9s,transform .9s cubic-bezier(.2,.7,.2,1)}
+.frame.op-arch.in .fr-cap,.frame.op-arch.in::before{opacity:1;translate:0 0}
 .band.plain{min-height:380px;background:radial-gradient(ellipse at 80% 20%,rgb(var(--accent-rgb)/.08),transparent 50%),var(--bg)}
 .band .wm{position:absolute;left:4%;top:50%;transform:translateY(-55%);width:min(420px,46vw);aspect-ratio:184/190;opacity:.07;pointer-events:none}
 /* product strip (cream) */
@@ -135,7 +152,8 @@
   .banner .txt{padding:0 0 44px;max-width:none;margin-top:-30px}
   .banner.framed .txt{margin-top:0;padding:36px 0 8px}
   .bn-grid{grid-template-columns:1fr;gap:0}
-  .frame{max-width:320px;margin:0 auto 44px;width:100%}
+  .frame{max-width:300px;margin:0 auto 52px;width:86%}
+  .fr-cap{left:-4%}
   .band.plain{min-height:auto;padding-top:56px}
   .mini-brand{margin-bottom:16px}
   .strip .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
@@ -159,8 +177,8 @@
 <div id="ftr"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="assets/config.js?v=20261017m"></script>
-<script src="assets/app.js?v=20261017m"></script>
+<script src="assets/config.js?v=20261017n"></script>
+<script src="assets/app.js?v=20261017n"></script>
 <script>
 const { discountPct, esc } = RC;
 const $ = s => document.querySelector(s);
@@ -279,7 +297,7 @@ function build() {
           <div class="ar">${K.banner.ar}</div>
           <p>${K.banner.sub}</p>
           <a class="btn-line" href="#${k}-shop">${K.banner.cta} ${DQ.ICON.arrow}</a>
-        </div>${img.hero ? '' : `<a class="frame op op-arch" href="${RC.productUrl(img.product)}" aria-label="${esc(img.product.name)}"><img src="${esc(img.product.images[0])}" alt="${esc(img.product.name)}"><span class="en">${esc(img.product.name)}</span></a>`}</div></div>
+        </div>${img.hero ? '' : `<a class="frame op op-arch" href="${RC.productUrl(img.product)}" aria-label="${esc(img.product.name)}"><span class="fr-card"><span class="fr-tag en">FEATURED</span><img src="${esc(img.product.images[0])}" alt="${esc(img.product.name)}"></span><span class="fr-cap"><span><b>${esc(img.product.name)}</b><small>${RC.money(RC.finalPrice(img.product))}</small></span><i>${DQ.ICON.arrow}</i></span></a>`}</div></div>
       <div class="strip" data-glow id="${k}-shop"><div class="wrap strip-in">
         <div class="strip-head op op-stagger"><h3 class="en">${K.en}<small>${K.ar}</small></h3><button class="view-all" data-va="${k}"><span>عرض الكل</span> ${DQ.ICON.arrow}</button></div>
         <div class="tabs op op-stagger" role="tablist">
