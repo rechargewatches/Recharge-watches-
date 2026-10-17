@@ -30,8 +30,17 @@
 
   /* ---------- small helpers ---------- */
   DQ.toast = (msg, type = '') => { const t = document.createElement('div'); t.className = 'toast ' + type; t.textContent = msg; $('#toasts').appendChild(t); setTimeout(() => { t.style.transition = 'opacity .3s'; t.style.opacity = 0; setTimeout(() => t.remove(), 300) }, 2800); };
-  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target) } }), { threshold: .12 });
-  DQ.reveal = () => document.querySelectorAll('.reveal:not(.in)').forEach(el => io.observe(el));
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target) } }), { threshold: .12, rootMargin: '0px 0px -8% 0px' });
+  DQ.reveal = () => document.querySelectorAll('.reveal:not(.in), .op:not(.in)').forEach(el => io.observe(el));
+  // gentle parallax for section backgrounds (data-parallax) — one rAF per frame, skipped for reduced motion
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    let ticking = false;
+    addEventListener('scroll', () => { if (ticking) return; ticking = true; requestAnimationFrame(() => {
+      ticking = false; const vh = innerHeight;
+      document.querySelectorAll('[data-parallax].in').forEach(el => { const r = el.getBoundingClientRect(); if (r.bottom < 0 || r.top > vh) return;
+        const t = (r.top + r.height / 2 - vh / 2) / vh; el.style.setProperty('--py', (t * -60).toFixed(1) + 'px'); });
+    }); }, { passive: true });
+  }
   DQ.priceHTML = (p) => { const off = discountPct(p); return `<div class="prices"><span class="price-new">${money(finalPrice(p))}</span>${off ? `<span class="price-old">${money(p.price)}</span>` : ''}</div>`; };
   DQ.img = (p, i = 0) => esc((p.images && p.images[i]) || FALLBACK);
   DQ.favs = new Set(); try { DQ.favs = new Set(JSON.parse(localStorage.getItem('dq-favs') || '[]')) } catch (e) {}
