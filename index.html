@@ -28,8 +28,8 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Archivo:wght@400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/base.css?v=20261017k">
-<link rel="stylesheet" href="assets/store.css?v=20261017k">
+<link rel="stylesheet" href="assets/base.css?v=20261017l">
+<link rel="stylesheet" href="assets/store.css?v=20261017l">
 <style>
 
 /* ---------- desktop landing: scroll through the Q ---------- */
@@ -159,8 +159,8 @@
 <div id="ftr"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="assets/config.js?v=20261017k"></script>
-<script src="assets/app.js?v=20261017k"></script>
+<script src="assets/config.js?v=20261017l"></script>
+<script src="assets/app.js?v=20261017l"></script>
 <script>
 const { discountPct, esc } = RC;
 const $ = s => document.querySelector(s);
@@ -177,7 +177,7 @@ const state = {}; // per section: { tab, all }
   const letters = [...document.querySelectorAll('#ldWord span')], fades = [...L.querySelectorAll('.ld-fade')], stage = L.querySelector('.ld-stick'), ring = document.getElementById('ldRing');
   const hand = c => dial.querySelector('.' + c);
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
-  let p = 0;
+  let p = 0, held = null;
   // real Egypt time (Africa/Cairo, follows DST automatically)
   const CF = new Intl.DateTimeFormat('en-GB', { timeZone: 'Africa/Cairo', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
   const cairo = d => { const o = {}; CF.formatToParts(d).forEach(x => o[x.type] = +x.value); return { h: o.hour % 24, m: o.minute, s: o.second }; };
@@ -218,13 +218,17 @@ const state = {}; // per section: { tab, all }
     const m = R > 0 ? `radial-gradient(circle at ${ctr}, transparent ${R}vmax, #000 calc(${R}vmax + 1px))` : 'none';
     stage.style.webkitMaskImage = m; stage.style.maskImage = m;
     stage.style.pointerEvents = p > .85 ? 'none' : '';
-    // the store waits right under the header while the window opens, then scrolls on normally
-    const secs = document.getElementById('sections'), navH = nav ? nav.offsetHeight : 0;
-    L.style.marginBottom = -(stage.offsetHeight - navH) + 'px';
-    if (secs) secs.style.transform = p < 1 ? `translateY(${-(L.offsetHeight - stage.offsetHeight) * (1 - p)}px)` : '';
+    // the store waits right under the header while the window opens (held with position:fixed,
+    // so it never lags behind the scroll), then is released exactly where it already sits
+    const secs = document.getElementById('sections'), navH = nav ? nav.offsetHeight : 0, fix = p < 1;
+    if (secs) {
+      if (fix !== held) { held = fix; Object.assign(secs.style, fix ? { position: 'fixed', left: '0', right: '0', zIndex: '1' } : { position: '', top: '', left: '', right: '', zIndex: '' }); }
+      if (fix) secs.style.top = navH + 'px';
+      L.style.marginBottom = (-(stage.offsetHeight - navH) + (fix ? secs.offsetHeight : 0)) + 'px';
+    }
     ring.style.width = ring.style.height = (R * 2) + 'vmax'; ring.style.opacity = R > 0 && R < 110 && p < 1 ? 1 : 0;
   }
-  addEventListener('scroll', onScroll, { passive: true }); onScroll(); requestAnimationFrame(frame);
+  addEventListener('scroll', onScroll, { passive: true }); onScroll(); addEventListener('resize', onScroll); const _s = document.getElementById('sections'); if (_s && window.ResizeObserver) new ResizeObserver(onScroll).observe(_s); requestAnimationFrame(frame);
   L.addEventListener('pointermove', e => { L.style.setProperty('--mx', e.clientX / innerWidth * 100 + '%'); L.style.setProperty('--my', e.clientY / innerHeight * 100 + '%'); });
 })();
 
