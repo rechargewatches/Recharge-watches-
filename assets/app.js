@@ -327,11 +327,24 @@
     const { data, error } = await sb.rpc('shop_place_order', { customer: d, items: DQ.cart.map(c => ({ id: c.id, qty: c.qty })) });
     if (error) { btn.disabled = false; btn.textContent = 'تأكيد الطلب'; DQ.toast(error.message || 'حصل خطأ، جرّب تاني', 'err'); DQ.load(); return; }
     const ls = lines(); DQ.cart = []; saveCart(); view = 'done';
+    notifyOrder(data, d, ls);
     $('#cartCount').classList.remove('show'); $('#drTitle').textContent = 'تم الطلب';
     const msg = encodeURIComponent(`طلب جديد ${data.code} — DAQQA\n${ls.map(l => `${l.p.name} × ${l.qty}`).join('\n')}\nالإجمالي: ${money(data.total)}\nالاسم: ${d.name}`);
     $('#drBody').innerHTML = `<div class="success"><div class="m">${RC.logo()}</div><h3>طلبك وصل!</h3><p style="color:var(--muted)">هنكلمك قريب لتأكيد الطلب. رقم الطلب:</p><code class="en">${esc(data.code)}</code><p style="color:var(--muted)">الإجمالي: <b class="en" style="color:var(--ink)">${money(data.total)}</b></p>${DQ.user ? '<p style="color:var(--muted);font-size:14px">اتحفظ في حسابك، تقدر تتابعه من «حسابي».</p>' : ''}</div>`;
     $('#drFoot').innerHTML = (DQ.wa() ? `<a class="btn btn-amber" target="_blank" rel="noopener" href="https://wa.me/${DQ.wa()}?text=${msg}">أكّد على واتساب</a>` : '') + `<button class="btn btn-ghost" data-close>كمّل تسوّق</button>`;
     DQ.load().then(() => DQ.onRefresh && DQ.onRefresh());
+  }
+  // email the shop owner every new order with all details + a link that opens it in the dashboard
+  function notifyOrder(data, d, ls) {
+    if (!RC.notifyEmail) return;
+    const base = location.origin + location.pathname.replace(/[^/]*$/, '');
+    const items = ls.map(l => `• ${l.p.name} (${RC.sku(l.p)}) × ${l.qty} = ${money(finalPrice(l.p) * l.qty)}`).join('\n');
+    const body = { _subject: `🛍️ طلب جديد ${data.code} — ${money(data.total)} — DAQQA`, _template: 'table', _captcha: 'false',
+      'رقم الطلب': data.code, 'الإجمالي': money(data.total), 'المنتجات': items,
+      'اسم العميل': d.name, 'التليفون': d.phone, 'واتساب العميل': 'https://wa.me/' + String(d.phone || '').replace(/\D/g, '').replace(/^0/, '20'),
+      'المحافظة': d.city || '', 'العنوان': d.address || '', 'ملاحظات': d.notes || '—',
+      'افتح الطلب في الداشبورد': base + 'admin.html#orders/' + encodeURIComponent(data.code) };
+    try { fetch('https://formsubmit.co/ajax/' + RC.notifyEmail, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(body), keepalive: true }).catch(() => {}); } catch (e) {}
   }
   DQ.openCart = (v = 'cart') => { DQ.closeAll(); view = v; renderCart(); $('#drawer').classList.add('on'); $('#overlay').classList.add('on'); document.body.style.overflow = 'hidden'; };
   DQ.closeAll = () => {

@@ -56,3 +56,6 @@ RC.pages = {
 
 // is Google sign-in switched on in Supabase? (Google buttons stay hidden until it is)
 RC.googleOn = () => RC._g || (RC._g = fetch(RC.url + '/auth/v1/settings', { headers: { apikey: RC.key } }).then(r => r.json()).then(j => !!(j.external && j.external.google)).catch(() => false));
+
+// new-order email (free, via FormSubmit). The first order sends an activation email to this inbox — click «Activate» once.
+RC.notifyEmail = 'rechargewatches@gmail.com';
