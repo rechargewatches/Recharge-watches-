@@ -141,7 +141,7 @@
         <div><h4 class="en">HELP</h4><ul><li>الدفع عند الاستلام</li><li>شحن 2–5 أيام</li><li>استبدال خلال 14 يوم</li><li>ضمان على الماكينة</li></ul></div>
         <div><h4 class="en">CONTACT</h4><ul id="ftContact"><li>واتساب: <span class="en" id="ftWa">—</span></li><li><a href="https://www.instagram.com/" target="_blank" rel="noopener">Instagram</a></li><li><a href="https://www.tiktok.com/" target="_blank" rel="noopener">TikTok</a></li></ul></div>
       </div>
-      <div class="foot-bottom"><span class="en">© ${new Date().getFullYear()} DAQQA Accessories</span><span>دقّة في كل ثانية.</span></div></div></footer>
+      <div class="foot-bottom"><span class="en">© ${new Date().getFullYear()} DAQQA Accessories</span><span class="foot-motto">دقّت ساعة العمل.</span></div></div></footer>
       <div class="overlay" id="overlay"></div>
       <aside class="drawer" id="drawer" aria-label="السلة"><div class="dr-head"><h3 id="drTitle">السلة</h3><button class="icon-btn" data-close aria-label="إغلاق">${ICON.close}</button></div><div class="dr-body" id="drBody"></div><div class="dr-foot" id="drFoot"></div></aside>
       <div class="toast-wrap" id="toasts"></div>`;
