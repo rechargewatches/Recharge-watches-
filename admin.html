@@ -200,6 +200,14 @@ main{flex:1;min-width:0;padding:28px 32px 60px}
 .auth-note{font-size:13px;line-height:1.7;color:var(--muted);background:rgba(176,122,58,.1);border:1px solid rgba(176,122,58,.35);border-radius:12px;padding:12px 14px;text-align:center}
 #forgotForm,#resetForm{display:flex;flex-direction:column;gap:14px}
 #forgotForm.hidden,#resetForm.hidden,#loginForm.hidden{display:none}
+.tab-h{margin:14px 6px 4px;padding-top:12px;border-top:1px solid var(--line);font-size:11px;font-weight:700;color:var(--muted-2);letter-spacing:.04em}
+.tab-h:empty{padding-top:4px}
+.tab-h.lux{border-top-color:rgba(201,169,110,.45)}
+.tab-h.lux span{font:600 11px var(--f-ui);letter-spacing:.25em;background:linear-gradient(100deg,#9c7642,#f6e3b5 40%,#c9a96e 60%,#9c7642);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tab.tab-lux svg{color:#C9A96E}
+.tab.tab-lux.on{background:linear-gradient(120deg,rgba(201,169,110,.18),rgba(201,169,110,.06));color:#F2E3C2;box-shadow:inset 0 0 0 1px rgba(201,169,110,.35)}
+.scope-seg button.on.en{background:linear-gradient(120deg,#9c7642,#C9A96E);color:#140E08}
+.mob-tabs .tab-h{display:none}
 .cov-panel{margin-bottom:14px}
 .bslot .re{position:absolute;bottom:6px;left:6px;font-size:11px;padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.65);color:#fff}
 .lux-h{background:linear-gradient(100deg,#9c7642,#f6e3b5 40%,#c9a96e 60%,#9c7642);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.12em}
@@ -280,19 +288,29 @@ const ICONS = {
   dash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
   orders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>',
   lux: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M12 21 8 9l4-6 4 6z"/></svg>',
+  'lux-orders': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/><path d="m12 11 1.2 2.3 2.3.3-1.7 1.6.4 2.3-2.2-1.1-2.2 1.1.4-2.3-1.7-1.6 2.3-.3z"/></svg>',
   men: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="10" cy="14" r="6"/><path d="M14.5 9.5 21 3M15 3h6v6"/></svg>',
   women: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="9" r="6"/><path d="M12 15v7M9 19h6"/></svg>',
   covers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.8"/><path d="m21 15-5-5L5 20"/></svg>',
   products: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><path d="M12 8v4l3 2M9 2h6M9 22h6"/></svg>',
   settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z"/></svg>'
 };
-const TABS = [['dash','المبيعات'],['orders','الطلبات'],['products','المنتجات العادية'],['lux','Luxury'],['men','رجالي'],['women','حريمي'],['covers','صور الأقسام'],['settings','الإعدادات']];
+const TABS = [['dash','المبيعات'],
+  ['_h','المتجر العادي'], ['orders','الطلبات'], ['products','المنتجات'], ['men','رجالي'], ['women','حريمي'],
+  ['_h','Luxury', 'lux'], ['lux-orders','طلبات Luxury'], ['lux','منتجات Luxury'], ['lux-men','Luxury رجالي'], ['lux-women','Luxury حريمي'],
+  ['_h',''], ['covers','صور الأقسام'], ['settings','الإعدادات']];
+const MOB_TABS = ['dash','orders','products','lux-orders','lux','settings'];
+// an order counts as Luxury when any of its pieces is a Luxury product
+const isLuxOrder = o => (o.shop_order_items || []).some(i => { const p = products.find(x => x.id === i.product_id); return p && RC.isLuxury(p); });
+let dashScope = 'all';
 // product pages in the admin: each one is a filtered view of the same products table
 const SCOPES = {
   products: { title: 'المنتجات العادية', sub: 'كل المنتجات اللي في المتجر العادي (من غير Luxury)', test: p => !RC.isLuxury(p), init: { luxury: false } },
   lux:      { title: 'Luxury', sub: 'منتجات صفحة DAQQA Privé — مش بتظهر في المتجر العادي', test: p => RC.isLuxury(p), init: { luxury: true } },
   men:      { title: 'رجالي', sub: 'منتجات الرجالي وللجنسين في المتجر العادي', test: p => !RC.isLuxury(p) && (p.category === 'men' || p.category === 'unisex'), init: { category: 'men', luxury: false } },
-  women:    { title: 'حريمي', sub: 'منتجات الحريمي وللجنسين في المتجر العادي', test: p => !RC.isLuxury(p) && (p.category === 'women' || p.category === 'unisex'), init: { category: 'women', luxury: false } }
+  women:    { title: 'حريمي', sub: 'منتجات الحريمي وللجنسين في المتجر العادي', test: p => !RC.isLuxury(p) && (p.category === 'women' || p.category === 'unisex'), init: { category: 'women', luxury: false } },
+  'lux-men':   { title: 'Luxury رجالي', sub: 'قطع Luxury رجالي وللجنسين', test: p => RC.isLuxury(p) && (p.category === 'men' || p.category === 'unisex'), init: { category: 'men', luxury: true } },
+  'lux-women': { title: 'Luxury حريمي', sub: 'قطع Luxury حريمي وللجنسين', test: p => RC.isLuxury(p) && (p.category === 'women' || p.category === 'unisex'), init: { category: 'women', luxury: true } }
 };
 let tab = 'dash', range = 30, orderFilter = 'all', orderQuery = '', openOrders = new Set();
 let products = [], orders = [], settings = {}, chart = null, channel = null, freshIds = new Set();
@@ -314,7 +332,7 @@ async function boot() {
   $('#loginView').classList.add('hidden'); $('#appView').classList.remove('hidden');
   await loadAll(); renderTabs();
   const [h0, code] = decodeURIComponent(location.hash.slice(1)).split('/');
-  if (code) { const o = orders.find(x => x.code === code); orderQuery = code; orderFilter = 'all'; if (o) openOrders.add(o.id); go('orders'); }
+  if (code) { const o = orders.find(x => x.code === code); orderQuery = code; orderFilter = 'all'; if (o) openOrders.add(o.id); go(o && isLuxOrder(o) ? 'lux-orders' : 'orders'); }
   else go(h0 || 'dash');
   listen(); askNotify();
 }
@@ -377,34 +395,37 @@ function askNotify() { if ('Notification' in window && Notification.permission =
 function desktopNotify(o) {
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
   const n = new Notification(`طلب جديد ${o.code} — DAQQA`, { body: `${o.customer_name || ''} · ${o.city || ''}\nالإجمالي: ${money(o.total || 0)}`, icon: 'assets/icon-512.png', tag: o.code, requireInteraction: true });
-  n.onclick = () => { window.focus(); orderQuery = o.code; orderFilter = 'all'; openOrders.add(o.id); go('orders'); n.close(); };
+  n.onclick = () => { window.focus(); const full = orders.find(x => x.id === o.id); orderQuery = o.code; orderFilter = 'all'; openOrders.add(o.id); go(full && isLuxOrder(full) ? 'lux-orders' : 'orders'); n.close(); };
 }
 function beep() { try { const a = new (window.AudioContext || window.webkitAudioContext)(); [880, 1320].forEach((f, i) => { const o = a.createOscillator(), g = a.createGain(); o.frequency.value = f; o.connect(g); g.connect(a.destination); g.gain.setValueAtTime(.0001, a.currentTime + i*.15); g.gain.exponentialRampToValueAtTime(.2, a.currentTime + i*.15 + .02); g.gain.exponentialRampToValueAtTime(.0001, a.currentTime + i*.15 + .25); o.start(a.currentTime + i*.15); o.stop(a.currentTime + i*.15 + .3); }); } catch(e) {} }
 
 /* ---------- nav ---------- */
 function renderTabs() {
-  const n = orders.filter(o => o.status === 'new').length;
-  const html = TABS.map(([k, l]) => `<button class="tab ${k===tab?'on':''}" data-tab="${k}">${ICONS[k]}<span>${l}</span>${k==='orders' && n ? `<span class="pill en">${n}</span>` : ''}</button>`).join('');
-  $('#tabs').innerHTML = html; $('#mobTabs').innerHTML = html.replace('المنتجات والخصومات','المنتجات');
+  const nNew = lux => orders.filter(o => o.status === 'new' && isLuxOrder(o) === lux).length;
+  const ic = k => ICONS[k] || ICONS[k.replace('lux-', '')] || ICONS.lux;
+  const btn = ([k, l]) => { const n = k === 'orders' ? nNew(false) : k === 'lux-orders' ? nNew(true) : 0; return `<button class="tab ${k===tab?'on':''} ${k.startsWith('lux') ? 'tab-lux' : ''}" data-tab="${k}">${ic(k)}<span>${l}</span>${n ? `<span class="pill en">${n}</span>` : ''}</button>`; };
+  $('#tabs').innerHTML = TABS.map(t => t[0] === '_h' ? `<div class="tab-h ${t[2] || ''}">${t[1] ? `<span class="${t[2] ? 'en' : ''}">${t[1]}</span>` : ''}</div>` : btn(t)).join('');
+  $('#mobTabs').innerHTML = TABS.filter(t => MOB_TABS.includes(t[0])).map(([k, l]) => btn([k, {orders: 'الطلبات', 'lux-orders': 'Luxury', lux: 'منتجات L', products: 'المنتجات'}[k] || l])).join('');
 }
 document.addEventListener('click', e => { const t = e.target.closest('[data-tab]'); if (t) go(t.dataset.tab); });
 function go(t, keepScroll) {
   tab = t; history.replaceState(null, '', '#' + t); renderTabs();
   if (chart) { chart.destroy(); chart = null; }
-  ({dash: renderDash, orders: renderOrders, products: renderProducts, lux: renderProducts, men: renderProducts, women: renderProducts, covers: renderCovers, settings: renderSettings}[t] || renderDash)();
+  ({dash: renderDash, orders: renderOrders, 'lux-orders': renderOrders, products: renderProducts, lux: renderProducts, men: renderProducts, women: renderProducts, 'lux-men': renderProducts, 'lux-women': renderProducts, covers: renderCovers, settings: renderSettings}[t] || renderDash)();
   if (!keepScroll) scrollTo(0, 0);
 }
 
 /* ---------- dashboard ---------- */
 function renderDash() {
+  const ORD = orders.filter(o => dashScope === 'all' || isLuxOrder(o) === (dashScope === 'lux'));
   const since = range ? Date.now() - range * 864e5 : 0;
-  const inRange = orders.filter(o => new Date(o.created_at).getTime() >= since);
+  const inRange = ORD.filter(o => new Date(o.created_at).getTime() >= since);
   const valid = inRange.filter(o => o.status !== 'cancelled');
   const rev = valid.reduce((s, o) => s + +o.total, 0);
   const units = valid.reduce((s, o) => s + o.shop_order_items.reduce((a, i) => a + i.qty, 0), 0);
   const savings = valid.reduce((s, o) => s + +o.savings, 0);
   const delivered = inRange.filter(o => o.status === 'delivered').reduce((s, o) => s + +o.total, 0);
-  const newN = orders.filter(o => o.status === 'new').length;
+  const newN = ORD.filter(o => o.status === 'new').length;
   // daily series
   const days = range || Math.max(7, Math.ceil((Date.now() - Math.min(Date.now(), ...orders.map(o => +new Date(o.created_at)))) / 864e5) + 1);
   const nd = Math.min(days, 120), labels = [], vals = [], cnts = [];
@@ -418,9 +439,10 @@ function renderDash() {
   const tp = {}; valid.forEach(o => o.shop_order_items.forEach(i => { const k = i.name; tp[k] = tp[k] || {name:k, units:0, rev:0}; tp[k].units += i.qty; tp[k].rev += +i.line_total; }));
   const top = Object.values(tp).sort((a, b) => b.rev - a.rev).slice(0, 6); const topMax = top[0] ? top[0].rev : 1;
   const byStatus = STATUS_KEYS.map(k => [k, inRange.filter(o => o.status === k).length]);
-  const lowStock = products.filter(p => p.active && p.stock <= 3);
+  const lowStock = products.filter(p => p.active && p.stock <= 3 && (dashScope === 'all' || RC.isLuxury(p) === (dashScope === 'lux')));
   $('#main').innerHTML = `
     <div class="head"><div><h1>المبيعات</h1><div class="sub">الأرقام بتتحدّث لحظياً مع كل طلب جديد</div></div>
+      <div class="seg scope-seg" id="scopeSeg">${[['all','الكل'],['reg','المتجر العادي'],['lux','Luxury']].map(([v,l]) => `<button data-scope="${v}" class="${v===dashScope?'on':''} ${v==='lux'?'en':''}">${l}</button>`).join('')}</div>
       <div class="seg" id="rangeSeg">${[[7,'7 أيام'],[30,'30 يوم'],[90,'90 يوم'],[0,'الكل']].map(([v,l]) => `<button data-range="${v}" class="${v===range?'on':''}">${l}</button>`).join('')}</div></div>
     <div class="kpis">
       <div class="kpi"><span>إجمالي المبيعات</span><b>${money(rev)}</b><small>بدون الملغي</small></div>
@@ -438,6 +460,7 @@ function renderDash() {
       <div class="panel"><h2>حالة الطلبات</h2><div class="status-dots">${byStatus.map(([k, n]) => `<div class="sd st-${k}"><i style="background:var(--c)"></i>${statuses[k]} <b class="en">${n}</b></div>`).join('')}</div></div>
       <div class="panel"><h2>مخزون قليل</h2>${lowStock.length ? lowStock.map(p => `<div class="bar-row"><div><span class="en">${esc(p.name)}</span><span style="color:${p.stock ? 'var(--amber)' : 'var(--red)'}">${p.stock ? 'فاضل ' + p.stock : 'خلص'}</span></div></div>`).join('') : '<div style="color:var(--muted)">كل المنتجات متوفرة.</div>'}</div>
     </div>`;
+  $('#scopeSeg').onclick = e => { const b = e.target.closest('[data-scope]'); if (b) { dashScope = b.dataset.scope; go('dash', true); } };
   $('#rangeSeg').onclick = e => { const b = e.target.closest('[data-range]'); if (b) { range = +b.dataset.range; go('dash', true); } };
   const cs = getComputedStyle(document.documentElement);
   if (window.Chart) chart = new Chart($('#salesChart'), {
@@ -451,11 +474,12 @@ function renderDash() {
 
 /* ---------- orders ---------- */
 function renderOrders() {
+  const LUXT = tab === 'lux-orders', ORD = orders.filter(o => isLuxOrder(o) === LUXT);
   const q = orderQuery.trim().toLowerCase();
-  const list = orders.filter(o => (orderFilter === 'all' || o.status === orderFilter) && (!q || [o.code, o.customer_name, o.phone, o.city].join(' ').toLowerCase().includes(q)));
-  const counts = Object.fromEntries(STATUS_KEYS.map(k => [k, orders.filter(o => o.status === k).length]));
+  const list = ORD.filter(o => (orderFilter === 'all' || o.status === orderFilter) && (!q || [o.code, o.customer_name, o.phone, o.city].join(' ').toLowerCase().includes(q)));
+  const counts = Object.fromEntries(STATUS_KEYS.map(k => [k, ORD.filter(o => o.status === k).length]));
   $('#main').innerHTML = `
-    <div class="head"><div><h1>الطلبات</h1><div class="sub">${orders.length} طلب · بيوصلك إشعار وصوت مع كل طلب جديد</div></div></div>
+    <div class="head"><div><h1 ${LUXT ? 'class="en lux-h"' : ''}>${LUXT ? 'Luxury Orders' : 'الطلبات'}</h1><div class="sub">${ORD.length} طلب · بيوصلك إشعار وصوت مع كل طلب جديد</div></div></div>
     <div class="toolbar">
       <div class="seg" id="ordSeg"><button data-of="all" class="${orderFilter==='all'?'on':''}">الكل</button>${STATUS_KEYS.map(k => `<button data-of="${k}" class="${orderFilter===k?'on':''}">${statuses[k]} <span class="en">${counts[k]}</span></button>`).join('')}</div>
       <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="oq" placeholder="بحث بالاسم أو الرقم أو الكود" value="${esc(orderQuery)}"></label>
