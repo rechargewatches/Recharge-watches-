@@ -310,19 +310,34 @@
       $('#drBody').innerHTML = (DQ.user ? `<div class="acc-note ok">الطلب هيتحفظ في حسابك <b class="en">${esc(DQ.user.email || '')}</b></div>` : `<div class="acc-note">عندك حساب؟ <button type="button" class="acc-link" id="coLogin">سجّل دخول</button> عشان طلبك يتحفظ وتتابعه.</div>`) + `<form class="form-grid" id="coForm" autocomplete="on">
         <div class="field"><label for="f-name">الاسم *</label><input id="f-name" class="input" name="name" required value="${esc(saved.name || '')}" autocomplete="name"></div>
         <div class="field"><label for="f-phone">رقم الموبايل *</label><input id="f-phone" class="input en" name="phone" required inputmode="tel" pattern="[0-9+ ]{10,15}" value="${esc(saved.phone || '')}" autocomplete="tel" dir="ltr" style="text-align:right"></div>
-        <div class="field"><label for="f-city">المحافظة *</label><select id="f-city" class="input" name="city" required><option value="">اختار المحافظة</option>${GOV.map(c => `<option ${c === saved.city ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
-        <div class="field"><label for="f-addr">العنوان بالتفصيل *</label><textarea id="f-addr" class="input" name="address" required rows="2">${esc(saved.address || '')}</textarea></div>
-        <div class="field"><label for="f-notes">ملاحظات</label><textarea id="f-notes" class="input" name="notes" rows="2" placeholder="اختياري"></textarea></div></form>`;
+        <div class="field"><label id="cityLbl">المحافظة *</label><div class="dd" id="cityDD">
+          <button type="button" class="input dd-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="cityLbl"><span class="dd-val ${saved.city ? '' : 'ph'}">${esc(saved.city || 'اختار المحافظة')}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+          <input type="hidden" name="city" id="f-city" value="${esc(saved.city || '')}">
+          <div class="dd-pop"><input class="input dd-search" placeholder="دوّر على محافظتك…" aria-label="بحث"><div class="dd-list" role="listbox">${GOV.map(c => `<button type="button" role="option" data-v="${c}" class="${c === saved.city ? 'on' : ''}" aria-selected="${c === saved.city}">${c}</button>`).join('')}</div></div></div></div>
+        <div class="field"><label for="f-addr">العنوان بالتفصيل *</label><textarea id="f-addr" class="input addr" name="address" required rows="4" placeholder="المنطقة، الشارع، رقم العمارة، الدور والشقة، علامة مميزة">${esc(saved.address || '')}</textarea></div>
+        <div class="field"><label for="f-notes">ملاحظات</label><textarea id="f-notes" class="input" name="notes" rows="2" placeholder="اختياري">${esc(saved.notes || '')}</textarea></div></form>`;
       $('#drFoot').innerHTML = sum + `<span class="ship-note">الدفع كاش عند الاستلام.</span><div style="display:flex;gap:8px"><button class="btn btn-ghost" id="back">رجوع</button><button class="btn btn-amber" id="place" style="flex:1">تأكيد الطلب · ${money(t.total)}</button></div>`;
       $('#back').onclick = () => { view = 'cart'; renderCart(); };
       if ($('#coLogin')) $('#coLogin').onclick = () => DQ.openAccount('login');
       $('#place').onclick = placeOrder;
+      // keep what the customer typed (survives any re-render or reload)
+      const keep = () => { try { localStorage.setItem('dq-cust', JSON.stringify(Object.fromEntries(new FormData($('#coForm'))))) } catch (e) {} };
+      $('#coForm').addEventListener('input', keep);
+      const dd = $('#cityDD'), btn = dd.querySelector('.dd-btn'), q = dd.querySelector('.dd-search');
+      const open = v => { dd.classList.toggle('open', v); btn.setAttribute('aria-expanded', v); if (v) { q.value = ''; dd.querySelectorAll('.dd-list button').forEach(b => b.hidden = false); setTimeout(() => q.focus(), 30); const on = dd.querySelector('.dd-list .on'); on && on.scrollIntoView({ block: 'center' }); } };
+      btn.onclick = () => open(!dd.classList.contains('open'));
+      q.oninput = () => { const t = q.value.trim(); dd.querySelectorAll('.dd-list button').forEach(b => b.hidden = t && !b.dataset.v.includes(t)); };
+      q.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); const f = dd.querySelector('.dd-list button:not([hidden])'); f && f.click(); } if (e.key === 'Escape') { e.stopPropagation(); open(false); btn.focus(); } };
+      dd.querySelector('.dd-list').onclick = e => { const b = e.target.closest('[data-v]'); if (!b) return; $('#f-city').value = b.dataset.v; const v = dd.querySelector('.dd-val'); v.textContent = b.dataset.v; v.classList.remove('ph'); dd.classList.remove('err');
+        dd.querySelectorAll('.dd-list button').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-selected', x === b); }); open(false); keep(); };
+      document.addEventListener('pointerdown', e => { if (!dd.contains(e.target)) open(false); });
     }
   }
   async function placeOrder() {
     const f = $('#coForm'); if (!f.reportValidity()) return;
+    if (!$('#f-city').value) { $('#cityDD').classList.add('err'); $('#cityDD .dd-btn').click(); return DQ.toast('اختار المحافظة', 'err'); }
     const d = Object.fromEntries(new FormData(f));
-    try { localStorage.setItem('dq-cust', JSON.stringify({ name: d.name, phone: d.phone, city: d.city, address: d.address })) } catch (e) {}
+    try { localStorage.setItem('dq-cust', JSON.stringify({ name: d.name, phone: d.phone, city: d.city, address: d.address })) } catch (e) {} /* notes are not kept for the next order */
     const btn = $('#place'); btn.disabled = true; btn.textContent = 'جاري الإرسال...';
     const { data, error } = await sb.rpc('shop_place_order', { customer: d, items: DQ.cart.map(c => ({ id: c.id, qty: c.qty })) });
     if (error) { btn.disabled = false; btn.textContent = 'تأكيد الطلب'; DQ.toast(error.message || 'حصل خطأ، جرّب تاني', 'err'); DQ.load(); return; }
@@ -359,11 +374,12 @@
   const STATUS = { new: 'جديد', confirmed: 'اتأكد', shipped: 'في الطريق', delivered: 'اتسلم', cancelled: 'اتلغى' };
   const userName = u => (u && (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name))) || (u && u.email ? u.email.split('@')[0] : '');
   async function setUser(u) {
+    const changed = ((DQ.user && DQ.user.id) || null) !== ((u && u.id) || null);
     DQ.user = u || null; DQ.isAdmin = false;
     const dot = $('#accDot'); if (dot) dot.classList.toggle('on', !!u);
     if (u) { try { const r = await sb.rpc('shop_is_admin'); DQ.isAdmin = !!r.data; } catch (e) {} }
     if ($('#accSheet') && $('#accSheet').classList.contains('on')) renderAccount();
-    if (view === 'checkout' && $('#drawer') && $('#drawer').classList.contains('on')) renderCart();
+    if (changed && view === 'checkout' && $('#drawer') && $('#drawer').classList.contains('on')) renderCart();
   }
   const back = () => location.origin + location.pathname + location.search;
   DQ.signInGoogle = async () => {

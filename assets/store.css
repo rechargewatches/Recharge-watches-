@@ -356,3 +356,22 @@ html,body{overflow-x:clip}
 @media (hover:none){.ph-dots{opacity:1}}
 .g-only[hidden]{display:none!important}
 .g-only{display:grid;gap:14px}
+
+/* governorate dropdown (custom, searchable) + roomier address box */
+.dd{position:relative}
+.dd-btn{display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:right;cursor:pointer}
+.dd-btn svg{width:18px;height:18px;color:var(--accent);flex:none;transition:transform .3s}
+.dd.open .dd-btn{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
+.dd.open .dd-btn svg{transform:rotate(180deg)}
+.dd.err .dd-btn{border-color:var(--red)}
+.dd-val{font-weight:600;color:var(--ink)}
+.dd-val.ph{font-weight:400;color:var(--muted-2)}
+.dd-pop{position:absolute;inset-inline:0;top:calc(100% + 8px);z-index:30;padding:8px;border-radius:16px;background:var(--surface);border:1px solid var(--line);box-shadow:0 30px 60px -20px rgba(0,0,0,.6);opacity:0;visibility:hidden;transform:translateY(-6px);transition:opacity .2s,transform .25s cubic-bezier(.2,.8,.2,1),visibility .2s}
+.dd.open .dd-pop{opacity:1;visibility:visible;transform:none;transition:opacity .2s,transform .25s cubic-bezier(.2,.8,.2,1),visibility 0s}
+.dd-search{height:42px;margin-bottom:6px;font-size:14px}
+.dd-list{max-height:240px;overflow:auto;display:grid;grid-template-columns:1fr 1fr;gap:4px;overscroll-behavior:contain}
+.dd-list button{height:40px;padding:0 12px;border-radius:10px;text-align:right;font-size:14px;color:var(--ink);transition:background .15s,color .15s}
+.dd-list button:hover{background:rgb(var(--accent-rgb)/.12)}
+.dd-list button.on{background:var(--accent);color:var(--bg);font-weight:700}
+.dd-list button[hidden]{display:none}
+textarea.input.addr{min-height:120px;line-height:1.7}
