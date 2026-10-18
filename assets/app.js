@@ -343,9 +343,10 @@
     if (error) { btn.disabled = false; btn.textContent = 'تأكيد الطلب'; DQ.toast(error.message || 'حصل خطأ، جرّب تاني', 'err'); DQ.load(); return; }
     const ls = lines(); DQ.cart = []; saveCart(); view = 'done';
     notifyOrder(data, d, ls);
+    DQ.rememberOrder({ code: data.code, phone: d.phone, total: data.total, at: new Date().toISOString(), status: 'new', items: ls.map(l => ({ name: l.p.name, qty: l.qty, image: (l.p.images || [])[0] || '' })) });
     $('#cartCount').classList.remove('show'); $('#drTitle').textContent = 'تم الطلب';
     const msg = encodeURIComponent(`طلب جديد ${data.code} — DAQQA\n${ls.map(l => `${l.p.name} × ${l.qty}`).join('\n')}\nالإجمالي: ${money(data.total)}\nالاسم: ${d.name}`);
-    $('#drBody').innerHTML = `<div class="success"><div class="m">${RC.logo()}</div><h3>طلبك وصل!</h3><p style="color:var(--muted)">هنكلمك قريب لتأكيد الطلب. رقم الطلب:</p><code class="en">${esc(data.code)}</code><p style="color:var(--muted)">الإجمالي: <b class="en" style="color:var(--ink)">${money(data.total)}</b></p>${DQ.user ? '<p style="color:var(--muted);font-size:14px">اتحفظ في حسابك، تقدر تتابعه من «حسابي».</p>' : ''}</div>`;
+    $('#drBody').innerHTML = `<div class="success"><div class="m">${RC.logo()}</div><h3>طلبك وصل!</h3><p style="color:var(--muted)">هنكلمك قريب لتأكيد الطلب. رقم الطلب:</p><code class="en">${esc(data.code)}</code><p style="color:var(--muted)">الإجمالي: <b class="en" style="color:var(--ink)">${money(data.total)}</b></p><div class="acc-order" data-trk="${esc(data.code)}" style="text-align:right">${DQ.tracker('new')}</div><p style="color:var(--muted);font-size:13px">هتشوف كل خطوة هنا وفي «حسابي» أول ما تحصل.</p>${DQ.user ? '<p style="color:var(--muted);font-size:14px">اتحفظ في حسابك، تقدر تتابعه من «حسابي».</p>' : ''}</div>`;
     $('#drFoot').innerHTML = (DQ.wa() ? `<a class="btn btn-amber" target="_blank" rel="noopener" href="https://wa.me/${DQ.wa()}?text=${msg}">أكّد على واتساب</a>` : '') + `<button class="btn btn-ghost" data-close>كمّل تسوّق</button>`;
     DQ.load().then(() => DQ.onRefresh && DQ.onRefresh());
   }
@@ -371,11 +372,52 @@
   /* ---------- account: Google or email + password; orders are saved to the account ---------- */
   DQ.user = null; DQ.isAdmin = false;
   let accMode = 'login', accMsg = '';
-  const STATUS = { new: 'جديد', confirmed: 'اتأكد', shipped: 'في الطريق', delivered: 'اتسلم', cancelled: 'اتلغى' };
+  const STATUS = { new: 'تم الطلب', confirmed: 'جاري التجهيز', shipped: 'في الطريق', delivered: 'تم التسليم', cancelled: 'اتلغى' };
+  /* ---------- order tracking: 4 steps, live ---------- */
+  const STEPS = [['new', 'تم الطلب', 'وصلنا طلبك، هنكلمك قريب للتأكيد.', 'bag'], ['confirmed', 'جاري التجهيز', 'استلمنا طلبك وبنجهزه دلوقتي.', 'gift'], ['shipped', 'في الطريق', 'طلبك خرج مع المندوب وفي الطريق ليك.', 'truck'], ['delivered', 'تم التسليم', 'تم استلام الطلب — نتمنى تكون مبسوط بالخدمة 🤍', 'heart']];
+  DQ.tracker = (st) => {
+    if (st === 'cancelled') return `<div class="trk off"><p class="trk-msg">الطلب ده اتلغى. لو ده غلط كلمنا على واتساب.</p></div>`;
+    const i = Math.max(0, STEPS.findIndex(x => x[0] === st));
+    return `<div class="trk ${i === 3 ? 'done-all' : ''}" style="--p:${i / 3}"><div class="trk-line"><i></i></div><ol>${STEPS.map(([k, l, m, ic], j) => `<li class="${j < i ? 'done' : j === i ? 'cur' : ''}"><span class="trk-dot">${ICON[ic] || ''}</span><b>${l}</b></li>`).join('')}</ol><p class="trk-msg">${STEPS[i][2]}</p></div>`;
+  };
+  // orders placed on this device (works for guests too: tracked by code + phone)
+  const mine = () => { try { return JSON.parse(localStorage.getItem('dq-my-orders') || '[]') } catch (e) { return [] } };
+  const saveMine = l => { try { localStorage.setItem('dq-my-orders', JSON.stringify(l.slice(0, 30))) } catch (e) {} };
+  DQ.rememberOrder = (o) => saveMine([o, ...mine().filter(x => x.code !== o.code)]);
+  const orderCard = o => `<div class="acc-order" data-trk="${esc(o.code)}"><div class="ao-top"><code class="en">${esc(o.code)}</code><span class="ao-st st-${esc(o.status)}">${esc(STATUS[o.status] || o.status)}</span></div>
+      ${DQ.tracker(o.status)}
+      <div class="ao-items">${(o.items || o.shop_order_items || []).map(i => `<span>${i.image ? `<img src="${esc(i.image)}" alt="">` : ''}<em class="en">${esc(i.name)}</em> × ${i.qty}</span>`).join('')}</div>
+      <div class="ao-bot"><span>${new Date(o.created_at || o.at).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' })}</span><b class="en">${money(o.total)}</b></div></div>`;
+  async function trackLocal(codesToSkip = []) {
+    const list = mine().filter(o => !codesToSkip.includes(o.code)), out = [];
+    for (const o of list) { const r = await sb.rpc('shop_track_order', { p_code: o.code, p_phone: o.phone }).catch(() => ({})); if (r && r.data) out.push(r.data); else out.push({ code: o.code, status: o.status || 'new', total: o.total, created_at: o.at, items: o.items || [] }); }
+    return out;
+  }
+  // a status changed → update every tracker on the page + tell the customer
+  function applyStatus(code, st) {
+    const l = mine(), o = l.find(x => x.code === code); const was = o ? o.status : null;
+    if (o) { o.status = st; saveMine(l); }
+    document.querySelectorAll(`[data-trk="${CSS.escape(code)}"]`).forEach(el => { const t = el.querySelector('.trk'), b = el.querySelector('.ao-st'); if (t) t.outerHTML = DQ.tracker(st); if (b) { b.textContent = STATUS[st] || st; b.className = 'ao-st st-' + st; } });
+    if (was !== st) DQ.toast(st === 'delivered' ? `تم تسليم طلبك ${code} — نتمنى تكون مبسوط بالخدمة 🤍` : `طلبك ${code}: ${STATUS[st] || st}`, 'ok');
+  }
+  // live for signed-in customers (realtime) + light polling for orders on this device
+  let myCh = null;
+  function liveOrders(u) {
+    if (myCh) { sb.removeChannel(myCh); myCh = null; }
+    if (u) myCh = sb.channel('my-orders-' + u.id).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'shop_orders', filter: 'user_id=eq.' + u.id }, p => p.new && p.new.code && applyStatus(p.new.code, p.new.status)).subscribe();
+  }
+  async function pollMine() {
+    if (document.hidden) return;
+    for (const o of mine().filter(x => !['delivered', 'cancelled'].includes(x.status))) {
+      const r = await sb.rpc('shop_track_order', { p_code: o.code, p_phone: o.phone }).catch(() => null);
+      if (r && r.data && r.data.status && r.data.status !== o.status) applyStatus(o.code, r.data.status);
+    }
+  }
+  setInterval(pollMine, 20000); document.addEventListener('visibilitychange', pollMine); setTimeout(pollMine, 4000);
   const userName = u => (u && (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name))) || (u && u.email ? u.email.split('@')[0] : '');
   async function setUser(u) {
     const changed = ((DQ.user && DQ.user.id) || null) !== ((u && u.id) || null);
-    DQ.user = u || null; DQ.isAdmin = false;
+    DQ.user = u || null; DQ.isAdmin = false; if (changed) liveOrders(DQ.user);
     const dot = $('#accDot'); if (dot) dot.classList.toggle('on', !!u);
     if (u) { try { const r = await sb.rpc('shop_is_admin'); DQ.isAdmin = !!r.data; } catch (e) {} }
     if ($('#accSheet') && $('#accSheet').classList.contains('on')) renderAccount();
@@ -420,7 +462,9 @@
             <button class="btn btn-amber" type="submit" id="accSubmit">${up ? 'اعمل الحساب' : 'دخول'}</button>
           </form>
           ${up ? '' : '<button class="acc-link" data-mode="forgot">نسيت الباسورد؟</button>'}
-          <div class="acc-switch">${up ? 'عندك حساب؟ <button class="acc-link" data-mode="login">سجّل دخول</button>' : 'أول مرة؟ <button class="acc-link" data-mode="signup">اعمل حساب</button>'}</div>`;
+          <div class="acc-switch">${up ? 'عندك حساب؟ <button class="acc-link" data-mode="login">سجّل دخول</button>' : 'أول مرة؟ <button class="acc-link" data-mode="signup">اعمل حساب</button>'}</div>
+          ${mine().length ? '<h4 class="acc-h">طلباتك من الجهاز ده</h4><div id="devOrders"><div class="acc-empty">جاري التحميل…</div></div>' : ''}`;
+        if (mine().length) trackLocal().then(l => { const d = $('#devOrders'); if (d) d.innerHTML = l.map(orderCard).join(''); });
         $('#gBtn').onclick = DQ.signInGoogle;
         RC.googleOn().then(on => { const g = box.querySelector('.g-only'); if (g) g.hidden = !on; });
       }
@@ -457,11 +501,10 @@
     $('#accOut').onclick = async () => { await sb.auth.signOut(); DQ.toast('اتسجل الخروج'); };
     const { data, error } = await sb.from('shop_orders').select('code,status,total,created_at,shop_order_items(name,qty,image)').eq('user_id', u.id).order('created_at', { ascending: false }).limit(50);
     const el = $('#accOrders'); if (!el) return;
-    if (error) { el.innerHTML = '<div class="acc-empty">مش قادرين نجيب الطلبات دلوقتي.</div>'; return; }
-    if (!data.length) { el.innerHTML = '<div class="acc-empty">لسه مافيش طلبات. أي طلب تعمله وانت داخل هيظهر هنا.</div>'; return; }
-    el.innerHTML = data.map(o => `<div class="acc-order"><div class="ao-top"><code class="en">${esc(o.code)}</code><span class="ao-st st-${esc(o.status)}">${esc(STATUS[o.status] || o.status)}</span></div>
-      <div class="ao-items">${(o.shop_order_items || []).map(i => `<span>${i.image ? `<img src="${esc(i.image)}" alt="">` : ''}<em class="en">${esc(i.name)}</em> × ${i.qty}</span>`).join('')}</div>
-      <div class="ao-bot"><span>${new Date(o.created_at).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' })}</span><b class="en">${money(o.total)}</b></div></div>`).join('');
+    const acc = error ? [] : data, extra = await trackLocal(acc.map(o => o.code));
+    const all = [...acc, ...extra].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    if (!$('#accOrders')) return;
+    el.innerHTML = all.length ? all.map(orderCard).join('') : '<div class="acc-empty">لسه مافيش طلبات. أي طلب تعمله هيظهر هنا وتتابعه خطوة بخطوة.</div>';
   }
   DQ.openAccount = (mode) => { if (mode) accMode = mode; accMsg = ''; openSheet('#accSheet'); renderAccount(); };
   sb.auth.onAuthStateChange((ev, session) => {

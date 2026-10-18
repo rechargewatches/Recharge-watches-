@@ -6,7 +6,7 @@ window.RC = {
   bucket: 'shop-images',
   currency: 'ج.م',
   categories: { men: 'رجالي', women: 'حريمي', unisex: 'للجنسين' },
-  statuses: { new: 'جديد', confirmed: 'متأكد', shipped: 'اتشحن', delivered: 'اتسلم', cancelled: 'ملغي' }
+  statuses: { new: 'جديد', confirmed: 'تم الاستلام', shipped: 'في التوصيل', delivered: 'تم التسليم', cancelled: 'ملغي' }
 };
 RC.money = (n) => Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' ' + RC.currency;
 RC.finalPrice = (p) => (p.sale_price != null && Number(p.sale_price) < Number(p.price)) ? Number(p.sale_price) : Number(p.price);
