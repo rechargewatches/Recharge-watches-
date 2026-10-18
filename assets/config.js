@@ -53,3 +53,6 @@ RC.pages = {
   men:    { ar: 'رجالي', en: 'Men',    href: 'collection.html?c=men',   test: p => p.category === 'men' || p.category === 'unisex' },
   women:  { ar: 'حريمي', en: 'Women',  href: 'collection.html?c=women', test: p => p.category === 'women' || p.category === 'unisex' }
 };
+
+// is Google sign-in switched on in Supabase? (Google buttons stay hidden until it is)
+RC.googleOn = () => RC._g || (RC._g = fetch(RC.url + '/auth/v1/settings', { headers: { apikey: RC.key } }).then(r => r.json()).then(j => !!(j.external && j.external.google)).catch(() => false));

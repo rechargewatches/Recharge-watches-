@@ -382,8 +382,8 @@
       } else {
         const up = accMode === 'signup';
         box.innerHTML = `<p class="acc-lead">${up ? 'اعمل حساب وكل طلباتك هتتحفظ فيه.' : 'ادخل وشوف طلباتك، والطلبات الجاية تتحفظ في حسابك.'}</p>${note}
-          <button class="btn acc-google" id="gBtn" type="button">${ICON.google}<span>${up ? 'سجّل بحساب Google' : 'ادخل بحساب Google'}</span></button>
-          <div class="acc-or"><span>أو بالإيميل</span></div>
+          <div class="g-only" hidden><button class="btn acc-google" id="gBtn" type="button">${ICON.google}<span>${up ? 'سجّل بحساب Google' : 'ادخل بحساب Google'}</span></button>
+          <div class="acc-or"><span>أو بالإيميل</span></div></div>
           <form class="acc-form" id="accForm" autocomplete="on">
             ${up ? `<div class="field"><label for="a-name">الاسم</label><input id="a-name" class="input" required autocomplete="name"></div>` : ''}
             <div class="field"><label for="a-em">الإيميل</label><input id="a-em" class="input en" type="email" required autocomplete="email" dir="ltr"></div>
@@ -393,6 +393,7 @@
           ${up ? '' : '<button class="acc-link" data-mode="forgot">نسيت الباسورد؟</button>'}
           <div class="acc-switch">${up ? 'عندك حساب؟ <button class="acc-link" data-mode="login">سجّل دخول</button>' : 'أول مرة؟ <button class="acc-link" data-mode="signup">اعمل حساب</button>'}</div>`;
         $('#gBtn').onclick = DQ.signInGoogle;
+        RC.googleOn().then(on => { const g = box.querySelector('.g-only'); if (g) g.hidden = !on; });
       }
       box.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { accMode = b.dataset.mode; accMsg = ''; renderAccount(); });
       $('#accForm').onsubmit = async e => {

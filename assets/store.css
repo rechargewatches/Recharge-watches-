@@ -354,3 +354,5 @@ html,body{overflow-x:clip}
 .ph-dots i.on{background:#fff;width:22px}
 .card:hover .ph-dots,.card.flipping .ph-dots{opacity:1}
 @media (hover:none){.ph-dots{opacity:1}}
+.g-only[hidden]{display:none!important}
+.g-only{display:grid;gap:14px}
