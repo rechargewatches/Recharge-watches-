@@ -28,8 +28,8 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Archivo:wght@400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/base.css?v=20261018e">
-<link rel="stylesheet" href="assets/store.css?v=20261018e">
+<link rel="stylesheet" href="assets/base.css?v=20261018h">
+<link rel="stylesheet" href="assets/store.css?v=20261018h">
 <style>
 
 /* ---------- desktop landing: scroll through the Q ---------- */
@@ -198,8 +198,8 @@
 <div id="ftr"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="assets/config.js?v=20261018e"></script>
-<script src="assets/app.js?v=20261018e"></script>
+<script src="assets/config.js?v=20261018h"></script>
+<script src="assets/app.js?v=20261018h"></script>
 <script>
 const { discountPct, esc } = RC;
 const $ = s => document.querySelector(s);
@@ -318,7 +318,7 @@ function pick(k, list) {
 }
 function itemsFor(k) {
   const st = state[k];
-  let list = DQ.products.filter(p => RC.kindOf(p) === k).sort((a, b) => (b.featured - a.featured) || (a.sort - b.sort));
+  let list = DQ.products.filter(p => RC.kindOf(p) === k && !RC.isLuxury(p)).sort((a, b) => (b.featured - a.featured) || (a.sort - b.sort));
   if (st.tab === '__sale') list = list.filter(p => discountPct(p) > 0);
   else if (st.tab !== 'all') list = list.filter(p => (p.style || '') === st.tab);
   return list;
@@ -337,7 +337,7 @@ function build() {
   const live = DQ.liveKinds();
   if (!live.length) { $('#sections').innerHTML = `<div class="none"><div class="m">${RC.logo()}</div>${DQ.loadError ? 'حصلت مشكلة في التحميل. جرّب تعمل ريفريش.' : 'المنتجات جاية قريب.'}</div>`; return; }
   $('#sections').innerHTML = live.map((k, i) => {
-    const K = RC.kinds[k], all = DQ.products.filter(p => RC.kindOf(p) === k), img = pick(k, all);
+    const K = RC.kinds[k], all = DQ.products.filter(p => RC.kindOf(p) === k && !RC.isLuxury(p)), img = pick(k, all);
     const rank = s => { const i = K.styles.indexOf(s); return i < 0 ? 99 : i; };
     const styles = [...new Set(all.map(p => p.style).filter(Boolean))].sort((a, b) => rank(a) - rank(b));
     const sale = all.some(p => discountPct(p) > 0);

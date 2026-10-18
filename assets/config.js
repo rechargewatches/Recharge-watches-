@@ -49,9 +49,9 @@ RC.dial = (cls = '') => `<svg class="rc-mark ${cls}" viewBox="0 0 184 190" aria-
 // pages: Luxury (own design) + men / women collections. A page with no photographed products is hidden.
 RC.isLuxury = (p) => p.luxury === true || /luxury|limited|privé|prive|prestige/i.test(p.style || '');
 RC.pages = {
-  luxury: { ar: 'لاكشري', en: 'Luxury', href: 'luxury.html', test: p => RC.isLuxury(p) },
-  men:    { ar: 'رجالي', en: 'Men',    href: 'collection.html?c=men',   test: p => p.category === 'men' || p.category === 'unisex' },
-  women:  { ar: 'حريمي', en: 'Women',  href: 'collection.html?c=women', test: p => p.category === 'women' || p.category === 'unisex' }
+  luxury: { ar: 'Luxury', en: 'Luxury', href: 'luxury.html', test: p => RC.isLuxury(p) },
+  men:    { ar: 'رجالي', en: 'Men',    href: 'collection.html?c=men',   test: p => !RC.isLuxury(p) && (p.category === 'men' || p.category === 'unisex') },
+  women:  { ar: 'حريمي', en: 'Women',  href: 'collection.html?c=women', test: p => !RC.isLuxury(p) && (p.category === 'women' || p.category === 'unisex') }
 };
 
 // is Google sign-in switched on in Supabase? (Google buttons stay hidden until it is)

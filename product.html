@@ -20,8 +20,8 @@
 <link rel="apple-touch-icon" href="assets/icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Archivo:wght@400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/base.css?v=20261018e">
-<link rel="stylesheet" href="assets/store.css?v=20261018e">
+<link rel="stylesheet" href="assets/base.css?v=20261018h">
+<link rel="stylesheet" href="assets/store.css?v=20261018h">
 <style>
 .crumbs{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted-2);padding:22px 0;flex-wrap:wrap}
 .crumbs a:hover{color:var(--accent)}
@@ -122,8 +122,8 @@ details .body{padding:0 0 20px;color:var(--muted);font-size:15px;white-space:pre
 <div id="ftr"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="assets/config.js?v=20261018e"></script>
-<script src="assets/app.js?v=20261018e"></script>
+<script src="assets/config.js?v=20261018h"></script>
+<script src="assets/app.js?v=20261018h"></script>
 <script>
 const { money, finalPrice, discountPct, esc, categories } = RC;
 const $ = s => document.querySelector(s);
@@ -155,6 +155,8 @@ function render() {
   // SEO
   const cat = categories[p.category] || '', kind = RC.kindOf(p), K = RC.kinds[kind], noun = RC.noun(p);
   document.title = `${p.name} — ${noun} ${cat} | DAQQA`;
+  const LUX = RC.isLuxury(p);
+  if (LUX) { document.documentElement.classList.add('lux-mode'); document.documentElement.dataset.theme = 'dark'; document.querySelector('meta[name=theme-color]').content = '#0A0806'; }
   const desc = `${p.name} من DAQQA بـ ${money(finalPrice(p))}${off ? ` بدل ${money(p.price)} (خصم ${off}%)` : ''}. ${body ? body.slice(0, 110) + ' — ' : ''}الدفع عند الاستلام وشحن لكل مصر.`;
   document.querySelector('meta[name=description]').content = desc;
   $('#canon').href = url; $('#ogTitle').content = `${p.name} | DAQQA`; $('#ogDesc').content = desc;
@@ -166,10 +168,10 @@ function render() {
 
   const stockCls = p.stock <= 0 ? 'out' : p.stock <= 3 ? 'low' : '';
   const stockTxt = p.stock <= 0 ? 'نفدت الكمية' : p.stock <= 3 ? `فاضل ${p.stock} بس — اطلب بسرعة` : 'متاح للطلب';
-  const waMsg = encodeURIComponent(`أهلاً DAQQA 👋\nعاوز أسأل عن ${noun} ${p.name} (${money(finalPrice(p))})\n${url}`);
+  const waMsg = encodeURIComponent(`أهلاً DAQQA\nعاوز أسأل عن ${noun} ${p.name} (${money(finalPrice(p))})\n${url}`);
 
   $('#page').innerHTML = `
-    <nav class="crumbs" aria-label="مسار الصفحة"><a href="./">الرئيسية</a><span>/</span><a href="./#${kind}">${K.ar}</a><span>/</span><span>${esc(cat)}</span><span>/</span><span class="en">${esc(p.name)}</span></nav>
+    <nav class="crumbs" aria-label="مسار الصفحة"><a href="./">الرئيسية</a><span>/</span>${LUX ? `<a href="luxury.html" class="en" style="color:#C9A96E;letter-spacing:.2em">LUXURY</a><span>/</span>` : ''}<a href="${LUX ? 'luxury.html' : './#' + kind}">${K.ar}</a><span>/</span><span>${esc(cat)}</span><span>/</span><span class="en">${esc(p.name)}</span></nav>
     <div class="pd">
       <div class="gal">
         <div style="position:relative" class="op op-curtain">
@@ -181,7 +183,7 @@ function render() {
       </div>
       <div class="info op op-stagger">
         <span class="cat">${K.ar} · ${esc(cat)}${p.brand && !/recharge/i.test(p.brand) ? ' · <span class="en">' + esc(p.brand) + '</span>' : ''}</span>
-        <h1 class="en" dir="ltr" style="text-align:right">${esc(p.name)}</h1>
+        ${LUX ? '<span class="lux-ribbon en">DAQQA PRIVÉ</span>' : ''}<h1 class="en" dir="ltr" style="text-align:right">${esc(p.name)}</h1>
         <span class="pd-sku en">${RC.sku(p)}${p.style ? ' · ' + esc(p.style) : ''}</span>
         ${RC.colors(p).length ? `<div class="pd-colors"><span>الألوان المتاحة</span><div class="sw">${RC.colors(p).map(c => `<i style="background:${c}" title="${c.toUpperCase()}"></i>`).join('')}</div></div>` : ''}
         <div class="price-box"><span class="price-new">${money(finalPrice(p))}</span>${off ? `<span class="price-old">${money(p.price)}</span><span class="badge-off">-${off}%</span><span class="save-tag">هتوفّر ${money(p.price - finalPrice(p))}</span>` : ''}</div>
@@ -246,7 +248,7 @@ function render() {
   };
 
   // related
-  const rel = DQ.products.filter(x => x.id !== p.id).sort((a, b) => ((RC.kindOf(b) === kind) - (RC.kindOf(a) === kind)) || ((b.category === p.category) - (a.category === p.category)) || (b.featured - a.featured)).slice(0, 4);
+  const rel = DQ.products.filter(x => x.id !== p.id && RC.isLuxury(x) === RC.isLuxury(p)).sort((a, b) => ((RC.kindOf(b) === kind) - (RC.kindOf(a) === kind)) || ((b.category === p.category) - (a.category === p.category)) || (b.featured - a.featured)).slice(0, 4);
   if (rel.length) $('#related').innerHTML = `<div class="sec-head"><h2 class="en">You may <em>also like</em><span class="ar">ممكن تعجبك كمان</span></h2><a class="sec-link" href="./#${kind}">كل ال${K.ar} ←</a></div><div class="grid">${rel.map(DQ.card).join('')}</div>`;
   DQ.renderFavs(); DQ.reveal();
 }

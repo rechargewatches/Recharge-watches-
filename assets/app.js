@@ -106,7 +106,7 @@
   function pagesMenu(active) {
     const on = RC.pages[active] ? 'on' : '';
     return `<div class="pg-menu" data-pages><button type="button" class="pg-btn ${on}" aria-haspopup="true" aria-expanded="false">الصفحات <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-      <div class="pg-drop" role="menu">${Object.entries(RC.pages).map(([k, v]) => `<a role="menuitem" href="${v.href}" data-page="${k}" class="${k === 'luxury' ? 'lux' : ''} ${k === active ? 'on' : ''}"><b>${v.ar}</b><small class="en">${k === 'luxury' ? 'DAQQA PRIVÉ' : v.en.toUpperCase()}</small></a>`).join('')}</div></div>`;
+      <div class="pg-drop" role="menu">${Object.entries(RC.pages).filter(([k]) => k !== 'luxury').map(([k, v]) => `<a role="menuitem" href="${v.href}" data-page="${k}" class="${k === 'luxury' ? 'lux' : ''} ${k === active ? 'on' : ''}"><b>${v.ar}</b><small class="en">${k === 'luxury' ? 'DAQQA PRIVÉ' : v.en.toUpperCase()}</small></a>`).join('')}</div></div>`;
   }
   DQ.livePages = () => Object.keys(RC.pages).filter(k => DQ.products.some(p => RC.pages[k].test(p) && p.images && p.images.length));
   DQ.pageItems = k => DQ.products.filter(p => RC.pages[k].test(p) && p.images && p.images.length);
@@ -118,6 +118,7 @@
       <header class="nav-bar"><div class="wrap nav">
         <a href="./" class="brand" aria-label="DAQQA — الرئيسية"><span class="m">${RC.logo()}</span><span class="wm"><b>DAQQA</b><small>WATCHES</small></span></a>
         <nav class="links" aria-label="القائمة">${nav.map(([h, l, k]) => `<a href="${h}" data-kind="${k}" class="${k === active ? 'on' : ''}">${l}</a>`).join('')}${pagesMenu(active)}</nav>
+        <a href="luxury.html" class="lux-btn ${active === 'luxury' ? 'on' : ''}" data-page="luxury" aria-label="DAQQA Privé — Luxury"><i aria-hidden="true"></i><span class="en">LUXURY</span></a>
         <div class="actions">
           <button class="icon-btn theme-btn" id="themeBtn" aria-label="تغيير الوضع"><span class="i-sun">${ICON.sun}</span><span class="i-moon">${ICON.moon}</span></button>
           <button class="icon-btn" id="searchBtn" aria-label="بحث">${ICON.search}</button>
@@ -127,7 +128,7 @@
           <button class="icon-btn menu-btn" id="menuBtn" aria-label="القائمة">${ICON.menu}</button>
         </div></div></header>
       <div class="sheet" id="menuSheet" role="dialog" aria-label="القائمة"><div class="wrap sheet-head"><a href="./" class="brand"><span class="m">${RC.logo()}</span><span class="wm"><b>DAQQA</b><small>WATCHES</small></span></a><button class="icon-btn" data-close aria-label="إغلاق">${ICON.close}</button></div>
-        <div class="wrap sheet-body"><nav class="menu-list">${nav.map(([h, l, k]) => `<a href="${h}" data-kind="${k}" data-close>${l}<span class="en">${RC.kinds[k] ? RC.kinds[k].en.toUpperCase() : '→'}</span></a>`).join('')}<div class="menu-pages" data-pages><small class="en">PAGES</small>${Object.entries(RC.pages).map(([k, v]) => `<a href="${v.href}" data-page="${k}" class="${k === 'luxury' ? 'lux' : ''}" data-close>${v.ar}<span class="en">${v.en.toUpperCase()}</span></a>`).join('')}</div></nav></div></div>
+        <div class="wrap sheet-body"><a href="luxury.html" class="lux-row" data-page="luxury" data-close><span class="en">LUXURY</span><small class="en">DAQQA PRIVÉ COLLECTION</small></a><nav class="menu-list">${nav.map(([h, l, k]) => `<a href="${h}" data-kind="${k}" data-close>${l}<span class="en">${RC.kinds[k] ? RC.kinds[k].en.toUpperCase() : '→'}</span></a>`).join('')}<div class="menu-pages" data-pages><small class="en">PAGES</small>${Object.entries(RC.pages).filter(([k]) => k !== 'luxury').map(([k, v]) => `<a href="${v.href}" data-page="${k}" class="${k === 'luxury' ? 'lux' : ''}" data-close>${v.ar}<span class="en">${v.en.toUpperCase()}</span></a>`).join('')}</div><div class="menu-tools"><button type="button" id="mFav">${ICON.heart}<span>المفضلة</span></button><button type="button" id="mTheme"><span class="i-sun">${ICON.sun}</span><span class="i-moon">${ICON.moon}</span><span>تغيير الوضع</span></button><button type="button" id="mSearch">${ICON.search}<span>بحث</span></button><button type="button" id="mAcc">${ICON.user}<span>حسابي</span></button></div></nav></div></div>
       <div class="sheet" id="favSheet" role="dialog" aria-label="المفضلة"><div class="wrap sheet-head"><b style="font-size:18px">المفضلة</b><button class="icon-btn" data-close aria-label="إغلاق">${ICON.close}</button></div><div class="wrap sheet-body"><div class="search-res" id="favRes"></div></div></div>
       <div class="sheet" id="accSheet" role="dialog" aria-label="حسابي"><div class="wrap sheet-head"><b style="font-size:18px" id="accTitle">حسابي</b><button class="icon-btn" data-close aria-label="إغلاق">${ICON.close}</button></div><div class="wrap sheet-body"><div class="acc" id="accBody"></div></div></div>
       <div class="sheet" id="searchSheet" role="dialog" aria-label="بحث"><div class="wrap sheet-head"><b style="font-size:18px">بحث</b><button class="icon-btn" data-close aria-label="إغلاق">${ICON.close}</button></div>
@@ -149,6 +150,7 @@
     $('#accBtn').onclick = () => DQ.openAccount();
     $('#menuBtn').onclick = () => openSheet('#menuSheet');
     $('#themeBtn').onclick = toggleTheme;
+    $('#mTheme').onclick = e => toggleTheme(e); $('#mFav').onclick = () => { renderFavs(); openSheet('#favSheet'); }; $('#mAcc').onclick = () => DQ.openAccount(); $('#mSearch').onclick = () => { openSheet('#searchSheet'); setTimeout(() => $('#searchInput').focus(), 80); };
     $('#favBtn').onclick = () => { renderFavs(); openSheet('#favSheet'); };
     $('#searchBtn').onclick = () => { openSheet('#searchSheet'); setTimeout(() => $('#searchInput').focus(), 80); };
     $('#searchInput').oninput = e => renderSearch(e.target.value);
@@ -181,7 +183,17 @@
     html.style.setProperty('--vt-x', (r.left + r.width / 2) + 'px'); html.style.setProperty('--vt-y', (r.top + r.height / 2) + 'px');
     pop(e.currentTarget);
     const apply = () => { html.dataset.theme = next; try { localStorage.setItem('dq-theme', next) } catch (er) {} document.querySelector('meta[name=theme-color]')?.setAttribute('content', next === 'light' ? '#EFE6D8' : '#20160E'); };
-    if (document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.startViewTransition(apply); else apply();
+    if (document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) { html.classList.add('vt-theme'); document.startViewTransition(apply).finished.finally(() => html.classList.remove('vt-theme')); } else apply();
+  }
+  /* ---------- page transitions fallback (browsers without cross-document view transitions) ---------- */
+  if (!('onpagereveal' in window) && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.documentElement.classList.add('pg-fx');
+    document.addEventListener('click', e => {
+      const a = e.target.closest('a[href]'); if (!a || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || a.target === '_blank') return;
+      const u = new URL(a.href, location.href); if (u.origin !== location.origin || (u.pathname === location.pathname && u.search === location.search)) return;
+      e.preventDefault(); document.documentElement.classList.add('pg-leave'); setTimeout(() => { location.href = u.href; }, 280);
+    });
+    addEventListener('pageshow', e => { if (e.persisted) document.documentElement.classList.remove('pg-leave'); });
   }
   /* ---------- intro: the Q dial winds up, then the doors open (once per visit) ---------- */
   function intro() {
@@ -244,7 +256,7 @@
 
   /* ---------- data ---------- */
   DQ.byId = id => DQ.products.find(p => p.id === id);
-  DQ.liveKinds = () => Object.keys(RC.kinds).filter(k => DQ.products.some(p => RC.kindOf(p) === k && p.images && p.images.length));
+  DQ.liveKinds = () => Object.keys(RC.kinds).filter(k => DQ.products.some(p => RC.kindOf(p) === k && !RC.isLuxury(p) && p.images && p.images.length));
   function syncKinds() { const live = DQ.liveKinds(); document.querySelectorAll('[data-kind]').forEach(el => { if (RC.kinds[el.dataset.kind]) el.hidden = !live.includes(el.dataset.kind); });
     const lp = DQ.livePages(); document.querySelectorAll('[data-page]').forEach(el => { el.hidden = !lp.includes(el.dataset.page); }); document.querySelectorAll('[data-pages]').forEach(el => { el.hidden = !lp.length; }); }
   DQ.load = async () => {
@@ -355,7 +367,7 @@
     if (!RC.notifyEmail) return;
     const base = location.origin + location.pathname.replace(/[^/]*$/, '');
     const items = ls.map(l => `• ${l.p.name} (${RC.sku(l.p)}) × ${l.qty} = ${money(finalPrice(l.p) * l.qty)}`).join('\n');
-    const body = { _subject: `🛍️ طلب جديد ${data.code} — ${money(data.total)} — DAQQA`, _template: 'table', _captcha: 'false',
+    const body = { _subject: `طلب جديد ${data.code} — ${money(data.total)} — DAQQA`, _template: 'table', _captcha: 'false',
       'رقم الطلب': data.code, 'الإجمالي': money(data.total), 'المنتجات': items,
       'اسم العميل': d.name, 'التليفون': d.phone, 'واتساب العميل': 'https://wa.me/' + String(d.phone || '').replace(/\D/g, '').replace(/^0/, '20'),
       'المحافظة': d.city || '', 'العنوان': d.address || '', 'ملاحظات': d.notes || '—',
@@ -374,7 +386,7 @@
   let accMode = 'login', accMsg = '';
   const STATUS = { new: 'تم الطلب', confirmed: 'جاري التجهيز', shipped: 'في الطريق', delivered: 'تم التسليم', cancelled: 'اتلغى' };
   /* ---------- order tracking: 4 steps, live ---------- */
-  const STEPS = [['new', 'تم الطلب', 'وصلنا طلبك، هنكلمك قريب للتأكيد.', 'bag'], ['confirmed', 'جاري التجهيز', 'استلمنا طلبك وبنجهزه دلوقتي.', 'gift'], ['shipped', 'في الطريق', 'طلبك خرج مع المندوب وفي الطريق ليك.', 'truck'], ['delivered', 'تم التسليم', 'تم استلام الطلب — نتمنى تكون مبسوط بالخدمة 🤍', 'heart']];
+  const STEPS = [['new', 'تم الطلب', 'وصلنا طلبك، هنكلمك قريب للتأكيد.', 'bag'], ['confirmed', 'جاري التجهيز', 'استلمنا طلبك وبنجهزه دلوقتي.', 'gift'], ['shipped', 'في الطريق', 'طلبك خرج مع المندوب وفي الطريق ليك.', 'truck'], ['delivered', 'تم التسليم', 'تم استلام الطلب — نتمنى تكون مبسوط بالخدمة', 'heart']];
   DQ.tracker = (st) => {
     if (st === 'cancelled') return `<div class="trk off"><p class="trk-msg">الطلب ده اتلغى. لو ده غلط كلمنا على واتساب.</p></div>`;
     const i = Math.max(0, STEPS.findIndex(x => x[0] === st));
@@ -398,7 +410,7 @@
     const l = mine(), o = l.find(x => x.code === code); const was = o ? o.status : null;
     if (o) { o.status = st; saveMine(l); }
     document.querySelectorAll(`[data-trk="${CSS.escape(code)}"]`).forEach(el => { const t = el.querySelector('.trk'), b = el.querySelector('.ao-st'); if (t) t.outerHTML = DQ.tracker(st); if (b) { b.textContent = STATUS[st] || st; b.className = 'ao-st st-' + st; } });
-    if (was !== st) DQ.toast(st === 'delivered' ? `تم تسليم طلبك ${code} — نتمنى تكون مبسوط بالخدمة 🤍` : `طلبك ${code}: ${STATUS[st] || st}`, 'ok');
+    if (was !== st) DQ.toast(st === 'delivered' ? `تم تسليم طلبك ${code} — نتمنى تكون مبسوط بالخدمة` : `طلبك ${code}: ${STATUS[st] || st}`, 'ok');
   }
   // live for signed-in customers (realtime) + light polling for orders on this device
   let myCh = null;

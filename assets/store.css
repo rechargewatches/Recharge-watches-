@@ -209,7 +209,7 @@ html,body{overflow-x:clip}
 .pop{animation:pop .5s cubic-bezier(.3,1.6,.5,1)}
 @keyframes pop{0%{transform:scale(1)}35%{transform:scale(1.32)}60%{transform:scale(.92)}100%{transform:scale(1)}}
 ::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
-::view-transition-new(root){animation:themeReveal .75s cubic-bezier(.65,0,.35,1)}
+html.vt-theme::view-transition-new(root){animation:themeReveal .75s cubic-bezier(.65,0,.35,1)}
 @keyframes themeReveal{from{clip-path:circle(0 at var(--vt-x,90%) var(--vt-y,40px))}to{clip-path:circle(150vmax at var(--vt-x,90%) var(--vt-y,40px))}}
 
 /* ---------- intro: dial winds, doors open ---------- */
@@ -394,3 +394,55 @@ textarea.input.addr{min-height:120px;line-height:1.7}
 .trk-msg{margin-top:12px;font-size:13px;color:var(--muted);text-align:center;padding:10px 12px;border-radius:12px;background:rgb(var(--accent-rgb)/.08)}
 .trk.done-all .trk-msg{color:var(--ink);background:rgb(var(--accent-rgb)/.16);font-weight:600}
 .trk.off .trk-msg{color:var(--red);background:rgb(217 138 110/.1)}
+
+/* ---------- LUXURY button: its own glowing gold piece in the header ---------- */
+.lux-btn{position:relative;flex:none;display:inline-flex;align-items:center;gap:10px;height:40px;padding:0 20px 0 18px;border-radius:999px;isolation:isolate;overflow:hidden;
+  background:linear-gradient(120deg,#120c06,#2a1c0e 45%,#120c06);color:#F2E3C2;border:1px solid transparent;
+  box-shadow:0 0 0 1px rgba(201,169,110,.55) inset,0 0 18px rgba(201,169,110,.35),0 8px 26px -10px rgba(201,169,110,.55);animation:luxGlow 3.2s ease-in-out infinite;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.lux-btn span{font:600 11px var(--f-ui);letter-spacing:.42em;padding-left:.42em;background:linear-gradient(100deg,#9c7642,#f6e3b5 35%,#c9a96e 55%,#f6e3b5 75%,#9c7642);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:luxSheen 4s linear infinite}
+.lux-btn i{width:7px;height:7px;transform:rotate(45deg);background:linear-gradient(135deg,#f6e3b5,#a77d43);box-shadow:0 0 10px #e9c98a}
+.lux-btn::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;background:conic-gradient(from var(--la,0deg),transparent 0 60%,#f6e3b5 75%,transparent 90%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:luxSpin 3.5s linear infinite;z-index:-1}
+.lux-btn::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,240,205,.35),transparent);transform:skewX(-20deg);animation:luxSweep 3.8s ease-in-out infinite}
+.lux-btn:hover{transform:translateY(-2px) scale(1.04)}
+.lux-btn.on{box-shadow:0 0 0 1px #f6e3b5 inset,0 0 26px rgba(233,201,138,.55)}
+.lux-btn[hidden]{display:none}
+@property --la{syntax:"<angle>";inherits:false;initial-value:0deg}
+@keyframes luxSpin{to{--la:360deg}}
+@keyframes luxSheen{to{background-position:-220% 0}}
+@keyframes luxSweep{0%,55%{left:-60%}100%{left:130%}}
+@keyframes luxGlow{50%{box-shadow:0 0 0 1px rgba(233,201,138,.8) inset,0 0 30px rgba(233,201,138,.5),0 8px 30px -8px rgba(201,169,110,.7)}}
+.lux-row{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;margin:6px 0 18px;padding:18px;border-radius:18px;overflow:hidden;background:linear-gradient(120deg,#120c06,#2a1c0e 50%,#120c06);box-shadow:0 0 0 1px rgba(201,169,110,.55) inset,0 0 24px rgba(201,169,110,.3);animation:luxGlow 3.2s ease-in-out infinite}
+.lux-row span{font:600 18px var(--f-ui);letter-spacing:.5em;padding-left:.5em;background:linear-gradient(100deg,#9c7642,#f6e3b5 35%,#c9a96e 55%,#f6e3b5 75%,#9c7642);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:luxSheen 4s linear infinite}
+.lux-row small{font:600 9px var(--f-ui);letter-spacing:.4em;color:#a39479}
+.lux-row::after{content:"";position:absolute;top:0;bottom:0;width:30%;left:-40%;background:linear-gradient(100deg,transparent,rgba(255,240,205,.25),transparent);transform:skewX(-20deg);animation:luxSweep 3.8s ease-in-out infinite}
+.lux-row[hidden]{display:none}
+.menu-tools{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.menu-tools button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 6px;border-radius:14px;border:1px solid var(--line);font-size:13px;color:var(--ink)}
+.menu-tools svg{width:20px;height:20px;color:var(--accent)}
+.menu-tools .i-moon{display:none}
+:root[data-theme="light"] .menu-tools .i-sun{display:none}:root[data-theme="light"] .menu-tools .i-moon{display:inline}
+@media (min-width:901px){.lux-row,.menu-tools{display:none}}
+@media (max-width:900px){#themeBtn,#favBtn{display:none}}
+@media (max-width:560px){#searchBtn,#accBtn{display:none}.nav{gap:10px}.lux-btn{height:32px;padding:0 12px 0 10px;gap:7px}.lux-btn span{font-size:9px;letter-spacing:.3em;padding-left:.3em}.lux-btn i{width:5px;height:5px}}
+@media (max-width:380px){.lux-btn i{display:none}.lux-btn{padding:0 10px}.brand{gap:8px}.brand .wm b{font-size:16px;letter-spacing:.28em}.brand .wm small{letter-spacing:.45em}}
+@media (prefers-reduced-motion:reduce){.lux-btn,.lux-btn span,.lux-btn::before,.lux-btn::after,.lux-row,.lux-row span,.lux-row::after{animation:none}}
+
+/* a luxury product page wears the Privé look */
+:root.lux-mode{--bg:#0A0806;--nav:#0E0A07;--hero:#120D08;--surface:#120D08;--surface-2:#1a130b;--line:rgba(201,169,110,.22);--line-2:rgba(201,169,110,.35);--accent:#C9A96E;--accent-2:#9c7642;--accent-rgb:201 169 110;--bg-rgb:10 8 6;--ink:#F2E9D8;--muted:#A39479;--btn:#2a1c0e;--btn-hover:#C9A96E;--btn-ink:#F2E3C2;--glow:rgba(201,169,110,.2)}
+:root.lux-mode body{background:#0A0806}
+:root.lux-mode #themeBtn{display:none}
+:root.lux-mode .btn-primary{background:linear-gradient(120deg,#2a1c0e,#3a2814);border:1px solid rgba(201,169,110,.5)}
+:root.lux-mode .btn-amber{background:linear-gradient(120deg,#9c7642,#C9A96E 45%,#E9D3A3);color:#140E08}
+.lux-ribbon{display:inline-flex;align-items:center;gap:10px;font:600 10px var(--f-ui);letter-spacing:.42em;color:#C9A96E;margin-bottom:6px}
+.lux-ribbon::before{content:"";width:28px;height:1px;background:linear-gradient(90deg,transparent,#C9A96E)}
+
+/* ---------- smooth page-to-page transitions ---------- */
+@view-transition{navigation:auto}
+html:not(.vt-theme)::view-transition-old(root){animation:pgOut .38s cubic-bezier(.4,0,.2,1) both}
+html:not(.vt-theme)::view-transition-new(root){animation:pgIn .6s cubic-bezier(.2,.7,.2,1) both}
+@keyframes pgOut{to{opacity:0;transform:scale(.985);filter:blur(4px)}}
+@keyframes pgIn{from{opacity:0;transform:translateY(14px) scale(1.01);filter:blur(6px)}}
+/* browsers without cross-page view transitions: fade in on load, fade out on leave */
+html.pg-fx body{animation:pgIn .6s cubic-bezier(.2,.7,.2,1) both}
+html.pg-leave body{transition:opacity .3s,filter .3s,transform .3s;opacity:0;filter:blur(4px);transform:scale(.99)}
+@media (prefers-reduced-motion:reduce){html:not(.vt-theme)::view-transition-old(root),html:not(.vt-theme)::view-transition-new(root),html.pg-fx body{animation:none}}
