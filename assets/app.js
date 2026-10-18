@@ -529,10 +529,25 @@
     $('#rsForm').onsubmit = async e => { e.preventDefault(); const { error } = await sb.auth.updateUser({ password: $('#r-pw').value }); if (error) return DQ.toast(authError(error.message), 'err'); DQ.toast('اتغير الباسورد ✓', 'ok'); renderAccount(); };
   }
 
+  // the page is shown only once fonts, data and the first pictures are in (each wait is capped, so a slow line still opens)
+  const cap = (p, ms) => Promise.race([p, new Promise(r => setTimeout(r, ms))]);
+  const firstImages = () => Promise.all([...document.querySelectorAll('img')].filter(i => { const r = i.getBoundingClientRect(); return r.top < innerHeight * 1.2 && r.bottom > -50 && r.width; }).slice(0, 8)
+    .map(i => i.complete ? null : new Promise(r => { i.addEventListener('load', r, { once: true }); i.addEventListener('error', r, { once: true }); })));
+  let readyRes; window.DQ_READY = new Promise(r => readyRes = r);
+  window.DQ_reveal = () => {
+    const d = document.documentElement, L = document.getElementById('dqLoad'), bar = document.getElementById('dqBar');
+    if (bar) { bar.classList.add('done'); setTimeout(() => bar.remove(), 500); }
+    if (d.classList.contains('dq-loading') && L) { L.classList.add('out'); d.classList.remove('dq-loading'); setTimeout(() => L.remove(), 950); }
+    else { d.classList.remove('dq-loading'); L && L.remove(); }
+    window.DQ_reveal = () => {};
+    DQ.reveal(); readyRes();
+  };
+  if ('serviceWorker' in navigator && location.protocol === 'https:') addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
   DQ.start = async (active, onReady) => {
-    intro(); chrome(active); mouseFx();
-    try { await DQ.load(); } catch (e) { console.error(e); DQ.loadError = true; }
+    if (!window.DQ_LOADER) intro(); chrome(active); mouseFx();
+    try { await cap(DQ.load(), 15000); } catch (e) { console.error(e); DQ.loadError = true; }
     onReady && onReady();
-    DQ.reveal();
+    await cap(Promise.all([document.fonts ? document.fonts.ready : null, firstImages()]), 3500);
+    window.DQ_reveal();
   };
 })();
