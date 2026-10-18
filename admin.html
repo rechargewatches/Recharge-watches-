@@ -9,7 +9,7 @@
 <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Bodoni+Moda:wght@500&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/base.css?v=20261018i">
+<link rel="stylesheet" href="assets/base.css?v=20261018j">
 <script>try{const t=localStorage.getItem('rc-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <style>
 body{font-size:14px}
@@ -200,6 +200,9 @@ main{flex:1;min-width:0;padding:28px 32px 60px}
 .auth-note{font-size:13px;line-height:1.7;color:var(--muted);background:rgba(176,122,58,.1);border:1px solid rgba(176,122,58,.35);border-radius:12px;padding:12px 14px;text-align:center}
 #forgotForm,#resetForm{display:flex;flex-direction:column;gap:14px}
 #forgotForm.hidden,#resetForm.hidden,#loginForm.hidden{display:none}
+.cov-panel{margin-bottom:14px}
+.bslot .re{position:absolute;bottom:6px;left:6px;font-size:11px;padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.65);color:#fff}
+.lux-h{background:linear-gradient(100deg,#9c7642,#f6e3b5 40%,#c9a96e 60%,#9c7642);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.12em}
 .notify-ask{position:fixed;bottom:20px;left:20px;z-index:90;box-shadow:0 20px 40px -16px rgba(0,0,0,.6)}
 .g-or[hidden],.g-btn[hidden]{display:none!important}
 .g-or{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px}
@@ -264,7 +267,7 @@ main{flex:1;min-width:0;padding:28px 32px 60px}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="assets/config.js?v=20261018i"></script>
+<script src="assets/config.js?v=20261018j"></script>
 <script>
 const {money, finalPrice, discountPct, esc, categories, statuses} = RC;
 // read this before the client consumes the link: a password-recovery link lands here with type=recovery
@@ -276,10 +279,21 @@ const STATUS_KEYS = Object.keys(statuses);
 const ICONS = {
   dash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
   orders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>',
+  lux: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M12 21 8 9l4-6 4 6z"/></svg>',
+  men: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="10" cy="14" r="6"/><path d="M14.5 9.5 21 3M15 3h6v6"/></svg>',
+  women: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="9" r="6"/><path d="M12 15v7M9 19h6"/></svg>',
+  covers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.8"/><path d="m21 15-5-5L5 20"/></svg>',
   products: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><path d="M12 8v4l3 2M9 2h6M9 22h6"/></svg>',
   settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z"/></svg>'
 };
-const TABS = [['dash','المبيعات'],['orders','الطلبات'],['products','المنتجات والخصومات'],['settings','الإعدادات']];
+const TABS = [['dash','المبيعات'],['orders','الطلبات'],['products','المنتجات العادية'],['lux','Luxury'],['men','رجالي'],['women','حريمي'],['covers','صور الأقسام'],['settings','الإعدادات']];
+// product pages in the admin: each one is a filtered view of the same products table
+const SCOPES = {
+  products: { title: 'المنتجات العادية', sub: 'كل المنتجات اللي في المتجر العادي (من غير Luxury)', test: p => !RC.isLuxury(p), init: { luxury: false } },
+  lux:      { title: 'Luxury', sub: 'منتجات صفحة DAQQA Privé — مش بتظهر في المتجر العادي', test: p => RC.isLuxury(p), init: { luxury: true } },
+  men:      { title: 'رجالي', sub: 'منتجات الرجالي وللجنسين في المتجر العادي', test: p => !RC.isLuxury(p) && (p.category === 'men' || p.category === 'unisex'), init: { category: 'men', luxury: false } },
+  women:    { title: 'حريمي', sub: 'منتجات الحريمي وللجنسين في المتجر العادي', test: p => !RC.isLuxury(p) && (p.category === 'women' || p.category === 'unisex'), init: { category: 'women', luxury: false } }
+};
 let tab = 'dash', range = 30, orderFilter = 'all', orderQuery = '', openOrders = new Set();
 let products = [], orders = [], settings = {}, chart = null, channel = null, freshIds = new Set();
 const COLS = { kind: false, style: false, colors: false, luxury: false }; let pKind = 'all';
@@ -377,7 +391,7 @@ document.addEventListener('click', e => { const t = e.target.closest('[data-tab]
 function go(t, keepScroll) {
   tab = t; history.replaceState(null, '', '#' + t); renderTabs();
   if (chart) { chart.destroy(); chart = null; }
-  ({dash: renderDash, orders: renderOrders, products: renderProducts, settings: renderSettings}[t] || renderDash)();
+  ({dash: renderDash, orders: renderOrders, products: renderProducts, lux: renderProducts, men: renderProducts, women: renderProducts, covers: renderCovers, settings: renderSettings}[t] || renderDash)();
   if (!keepScroll) scrollTo(0, 0);
 }
 
@@ -500,20 +514,21 @@ document.addEventListener('change', async e => {
 
 /* ---------- products ---------- */
 function renderProducts() {
+  const SC = SCOPES[tab] || SCOPES.products, list = products.filter(SC.test);
   $('#main').innerHTML = `
-    <div class="head"><div><h1>المنتجات والخصومات</h1><div class="sub">عدّل الصور والأسعار والخصم — بيظهر في المتجر فوراً</div></div>
+    <div class="head"><div><h1 ${tab === 'lux' ? 'class="en lux-h"' : ''}>${SC.title}</h1><div class="sub">${SC.sub}</div></div>
       <button class="btn btn-amber" id="newP">+ منتج جديد</button></div>
-    <div class="seg" id="kindSeg" style="margin-bottom:14px;width:max-content;max-width:100%"><button data-pk="all" class="${pKind==='all'?'on':''}">الكل <span class="en">${products.length}</span></button>${Object.entries(RC.kinds).map(([k,v]) => `<button data-pk="${k}" class="${pKind===k?'on':''}">${v.ar} <span class="en">${products.filter(p => RC.kindOf(p)===k).length}</span></button>`).join('')}</div>
+    <div class="seg" id="kindSeg" style="margin-bottom:14px;width:max-content;max-width:100%"><button data-pk="all" class="${pKind==='all'?'on':''}">الكل <span class="en">${list.length}</span></button>${Object.entries(RC.kinds).map(([k,v]) => `<button data-pk="${k}" class="${pKind===k?'on':''}">${v.ar} <span class="en">${list.filter(p => RC.kindOf(p)===k).length}</span></button>`).join('')}</div>
     ${COLS.kind ? '' : `<div class="panel" style="margin-bottom:14px;border-color:var(--accent-2);color:var(--muted);font-size:13px">الأقسام (ساعات / نضارات / اكسسوارات) والأنواع والألوان محتاجين تفعيل مرة واحدة: شغّل ملف <b class="en">daqqa-update.sql</b> في Supabase ← SQL Editor. لحد ما تعمل كده كل المنتجات بتظهر في قسم الساعات.</div>`}
-    <div class="panel scroll-x" style="padding:6px 14px">${products.length ? `<table class="ptable"><thead><tr><th>المنتج</th><th>السعر</th><th>الخصم</th><th>المخزون</th><th>ظاهر</th></tr></thead><tbody>
-      ${products.filter(p => pKind==='all' || RC.kindOf(p)===pKind).map(p => { const off = discountPct(p); return `<tr data-edit="${p.id}">
+    <div class="panel scroll-x" style="padding:6px 14px">${tab === 'lux' && !COLS.luxury ? `<div class="empty" style="padding:16px">علامة Luxury محتاجة تفعيل: شغّل <b class="en">daqqa-pages.sql</b> في Supabase.</div>` : ''}${list.length ? `<table class="ptable"><thead><tr><th>المنتج</th><th>السعر</th><th>الخصم</th><th>المخزون</th><th>ظاهر</th></tr></thead><tbody>
+      ${list.filter(p => pKind==='all' || RC.kindOf(p)===pKind).map(p => { const off = discountPct(p); return `<tr data-edit="${p.id}">
         <td><div class="pcell"><img src="${esc(p.images[0] || '')}" alt="" onerror="this.style.visibility='hidden'"><div><b>${esc(p.name)}</b><small>${RC.kinds[RC.kindOf(p)].ar} · ${esc(categories[p.category] || p.category)}${p.style ? ' · ' + esc(p.style) : ''}${p.featured ? ' · مميز' : ''}${RC.isLuxury(p) ? ' · Luxury' : ''}</small></div></div></td>
         <td class="en"><b>${money(finalPrice(p))}</b>${off ? `<div class="price-old">${money(p.price)}</div>` : ''}</td>
         <td>${off ? `<span class="badge-off en">-${off}%</span>` : '<span style="color:var(--muted-2)">—</span>'}</td>
         <td class="en" style="color:${p.stock === 0 ? 'var(--red)' : p.stock <= 3 ? 'var(--amber)' : 'inherit'}">${p.stock}</td>
         <td><button class="switch ${p.active ? 'on' : ''}" data-active="${p.id}" aria-label="إظهار/إخفاء"></button></td></tr>`; }).join('')}
-      </tbody></table>` : '<div class="empty">مفيش منتجات. ضيف أول ساعة.</div>'}</div>`;
-  $('#newP').onclick = () => openEditor(null);
+      </tbody></table>` : `<div class="empty">مفيش منتجات هنا لسه. دوس «+ منتج جديد».</div>`}</div>`;
+  $('#newP').onclick = () => openEditor(null, SC.init);
   $('#kindSeg').onclick = e => { const b = e.target.closest('[data-pk]'); if (b) { pKind = b.dataset.pk; renderProducts(); } };
 }
 document.addEventListener('click', async e => {
@@ -523,9 +538,10 @@ document.addEventListener('click', async e => {
 });
 
 let draft = null;
-function openEditor(id) {
+function openEditor(id, init) {
   const p = id ? products.find(x => x.id === id) : null;
   draft = p ? {...p, images: [...p.images], kind: RC.kindOf(p), colors: RC.colors(p)} : {kind: pKind !== 'all' ? pKind : 'watches', style:'', colors:[], name:'', brand:'DAQQA', category:'men', description:'', price:'', sale_price:null, images:[], stock:1, featured:false, luxury:false, active:true, sort: products.length + 1};
+  if (!p && init) Object.assign(draft, init);
   renderEditor();
   $('#editor').classList.add('on'); $('#overlay').classList.add('on');
 }
@@ -666,7 +682,32 @@ async function deleteProduct() {
 async function saveBanner(k, slot, url) {
   const b = JSON.parse(JSON.stringify(settings.banners || {})); b[k] = b[k] || {}; if (url) b[k][slot] = url; else delete b[k][slot];
   const { error } = await sb.from('shop_settings').update({ banners: b, updated_at: new Date().toISOString() }).eq('id', 1);
-  if (error) return toast(error.message, 'err'); settings.banners = b; toast('اتحفظت ✓', 'ok'); renderSettings();
+  if (error) return toast(error.message, 'err'); settings.banners = b; toast('اتحفظت ✓', 'ok'); go(tab, true);
+}
+/* ---------- section photos: every section & page has its own cover, separate from products ---------- */
+const COVER_GROUPS = () => [
+  ['أقسام المتجر', 'البانر العريض فوق كل قسم + صورة اللايف ستايل تحت المنتجات', Object.entries(RC.kinds).map(([k, v]) => [k, v.ar, v.en, [['hero', 'البانر'], ['life', 'لايف ستايل']]])],
+  ['صفحات رجالي وحريمي', 'صورة الغلاف أول الصفحة', [['men', 'رجالي', 'Men', [['hero', 'الغلاف']]], ['women', 'حريمي', 'Women', [['hero', 'الغلاف']]]]],
+  ['Luxury — DAQQA Privé', 'صورة أول الصفحة (جوه الدايرة) + غلاف لكل سكشن جوه Luxury', [['luxury', 'الصفحة', 'Privé', [['hero', 'الصورة الرئيسية']]], ...Object.entries(RC.kinds).map(([k, v]) => ['lux-' + k, v.ar, v.en, [['hero', 'غلاف السكشن']]])]]
+];
+function renderCovers() {
+  const s = settings, B = s.banners || {};
+  $('#main').innerHTML = `<div class="head"><div><h1>صور الأقسام</h1><div class="sub">صورة لكل سكشن وصفحة في الموقع — منفصلة عن صور المنتجات. لو مفيش صورة، الموقع بيستخدم صورة أهم منتج.</div></div></div>
+    ${'banners' in s ? COVER_GROUPS().map(([title, sub, rows]) => `<div class="panel cov-panel"><h2>${title} <small>${sub}</small></h2><div class="sec-imgs">${rows.map(([k, ar, en, slots]) => { const b = B[k] || {}; return `
+      <div class="sec-img-row"><b>${ar} <span class="en" style="color:var(--muted)">${en}</span></b>
+        ${slots.map(([slot, lbl]) => `<div class="bslot">${b[slot] ? `<img src="${esc(b[slot])}" alt=""><button class="x" data-bdel="${k}:${slot}" aria-label="حذف">×</button><button class="re" data-bup="${k}:${slot}">تغيير</button>` : `<button class="up" data-bup="${k}:${slot}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>${lbl}</button>`}<small>${lbl}</small></div>`).join('')}
+      </div>`; }).join('')}</div></div>`).join('')
+    : `<div class="panel" style="color:var(--muted);font-size:13px">محتاج تفعيل مرة واحدة: شغّل ملف <b class="en">daqqa-update.sql</b> في Supabase ← SQL Editor.</div>`}`;
+  $('#main').onclick = async e => {
+    const up = e.target.closest('[data-bup]'), del = e.target.closest('[data-bdel]');
+    if (up) { const [k, slot] = up.dataset.bup.split(':'); const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
+      inp.onchange = async () => { const f = inp.files[0]; if (!f) return; up.disabled = true; up.textContent = 'جاري الرفع...';
+        try { const blob = await compress(f, 2200); const path = `banners/${k}-${slot}-${Date.now()}.webp`;
+          const { error } = await sb.storage.from(RC.bucket).upload(path, blob, { contentType: 'image/webp', cacheControl: '31536000' }); if (error) throw error;
+          await saveBanner(k, slot, sb.storage.from(RC.bucket).getPublicUrl(path).data.publicUrl); } catch (err) { toast('فشل الرفع: ' + (err.message || err), 'err'); go(tab, true); } };
+      inp.click(); }
+    if (del) { const [k, slot] = del.dataset.bdel.split(':'); if (await confirmBox('تشيل الصورة دي؟', 'شيل')) saveBanner(k, slot, null); }
+  };
 }
 function renderSettings() {
   const s = settings;
@@ -687,15 +728,6 @@ function renderSettings() {
         <div class="field"><label>تأكيد الباسورد</label><input class="input en" type="password" name="pw2" minlength="8" required autocomplete="new-password" dir="ltr"></div>
         <button class="btn btn-ghost" type="submit">تغيير</button>
       </form>
-    </div>
-    <div class="panel" style="margin-top:14px">
-      <h2>صور الأقسام <small>صورة البانر (عريضة) وصورة اللايف ستايل لكل قسم</small></h2>
-      ${'banners' in s ? `<div class="sec-imgs">${Object.entries(RC.kinds).map(([k, v]) => { const b = (s.banners || {})[k] || {}; return `
-        <div class="sec-img-row"><b>${v.ar} <span class="en" style="color:var(--muted)">${v.en}</span></b>
-          ${[['hero','البانر'],['life','لايف ستايل']].map(([slot, lbl]) => `<div class="bslot">${b[slot] ? `<img src="${esc(b[slot])}" alt=""><button class="x" data-bdel="${k}:${slot}" aria-label="حذف">×</button>` : `<button class="up" data-bup="${k}:${slot}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>${lbl}</button>`}<small>${lbl}</small></div>`).join('')}
-        </div>`; }).join('')}</div>
-        <small style="color:var(--muted-2);font-size:12px">من غير صورة بانر، البانر بيعرض صورة أهم منتج في القسم. القسم نفسه بيختفي لو مفيهوش منتجات بصور.</small>`
-      : `<div style="color:var(--muted);font-size:13px">محتاج تفعيل مرة واحدة: شغّل ملف <b class="en">daqqa-update.sql</b> في Supabase ← SQL Editor.</div>`}
     </div>`;
   $('#main').onclick = async e => {
     const up = e.target.closest('[data-bup]'), del = e.target.closest('[data-bdel]');

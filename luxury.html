@@ -18,8 +18,8 @@
 <link rel="apple-touch-icon" href="assets/icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Archivo:wght@400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/base.css?v=20261018i">
-<link rel="stylesheet" href="assets/store.css?v=20261018i">
+<link rel="stylesheet" href="assets/base.css?v=20261018j">
+<link rel="stylesheet" href="assets/store.css?v=20261018j">
 <style>
 /* DAQQA PRIVÉ — the luxury room: near-black, champagne gold, slow light */
 :root{--lx-bg:#0A0806;--lx-bg2:#120D08;--lx-gold:#C9A96E;--lx-gold-2:#E9D3A3;--lx-gold-3:#8C6A3A;--lx-ink:#F2E9D8;--lx-mute:#A39479;--lx-line:rgba(201,169,110,.22);
@@ -30,6 +30,41 @@ body{background:var(--lx-bg);color:var(--lx-ink)}
 .gold{background:linear-gradient(100deg,var(--lx-gold-3) 0%,var(--lx-gold-2) 28%,var(--lx-gold) 52%,var(--lx-gold-2) 76%,var(--lx-gold-3) 100%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:sheen 9s linear infinite}
 @keyframes sheen{to{background-position:-220% 0}}
 .lx-cap{font:600 10px var(--f-ui);letter-spacing:.5em;color:var(--lx-gold);text-transform:uppercase}
+
+/* entrance: a gold dial draws itself, the hand sweeps one full minute, then an iris opens onto the room */
+@property --iris{syntax:"<length-percentage>";inherits:false;initial-value:0%}
+.lx-intro{position:fixed;inset:0;z-index:300;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 50%,#1d140b,#060504 70%);cursor:pointer;
+  -webkit-mask:radial-gradient(circle at 50% 50%,transparent var(--iris),#000 calc(var(--iris) + 1px));mask:radial-gradient(circle at 50% 50%,transparent var(--iris),#000 calc(var(--iris) + 1px))}
+.lx-intro.open{animation:lxIris 1.25s cubic-bezier(.7,0,.2,1) forwards}
+@keyframes lxIris{to{--iris:150%}}
+.lxi-c{display:flex;flex-direction:column;align-items:center;gap:22px;transition:transform 1.2s cubic-bezier(.7,0,.2,1),opacity 1s}
+.lx-intro.open .lxi-c{transform:scale(1.6);opacity:0}
+.lxi-dial{width:min(46vmin,300px);overflow:visible;filter:drop-shadow(0 0 18px rgba(233,211,163,.25))}
+.lxi-ring{fill:none;stroke:#C9A96E;stroke-width:.8;stroke-dasharray:541;stroke-dashoffset:541;animation:lxDraw 1.3s cubic-bezier(.6,0,.2,1) .15s forwards;transform:rotate(-90deg);transform-origin:center}
+.lxi-ring2{fill:none;stroke:rgba(201,169,110,.3);stroke-width:.4;stroke-dasharray:579;stroke-dashoffset:579;animation:lxDraw 1.5s cubic-bezier(.6,0,.2,1) .3s forwards;transform:rotate(90deg);transform-origin:center}
+.lxi-ticks line{stroke:#8C6A3A;stroke-width:.5;opacity:0;animation:lxTick .3s ease forwards;animation-delay:calc(.35s + var(--i) * 16ms)}
+.lxi-ticks line.b{stroke:#E9D3A3;stroke-width:1.1}
+.lxi-hand{stroke:#E9D3A3;stroke-width:.9;stroke-linecap:round;transform-origin:100px 100px;opacity:0;animation:lxHand 1.6s cubic-bezier(.5,0,.2,1) .5s forwards}
+@keyframes lxDraw{to{stroke-dashoffset:0}}
+@keyframes lxTick{to{opacity:1}}
+@keyframes lxHand{0%{opacity:0;transform:rotate(0)}10%{opacity:1}100%{opacity:1;transform:rotate(360deg)}}
+.lxi-word{font:italic 400 clamp(34px,5vw,56px)/1 var(--f-display);letter-spacing:.9em;padding-left:.9em;opacity:0;background:linear-gradient(100deg,#8C6A3A,#F6E3B5 35%,#C9A96E 55%,#F6E3B5 75%,#8C6A3A);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:lxWord 1.4s cubic-bezier(.2,.7,.2,1) 1.05s forwards,sheen 6s linear infinite}
+.lxi-word em{font-style:italic}
+@keyframes lxWord{to{opacity:1;letter-spacing:.16em;padding-left:.16em}}
+.lxi-cap{font:600 10px var(--f-ui);letter-spacing:.6em;color:#A39479;opacity:0;animation:lxTick .8s ease 1.7s forwards}
+.lx-intro.quick .lxi-ring,.lx-intro.quick .lxi-ring2{animation-duration:.7s;animation-delay:0s}
+.lx-intro.quick .lxi-ticks line{animation-delay:calc(var(--i) * 6ms)}
+.lx-intro.quick .lxi-hand{animation-duration:.9s;animation-delay:.1s}
+.lx-intro.quick .lxi-word{animation-delay:.35s,0s;animation-duration:.8s,6s}
+.lx-intro.quick .lxi-cap{animation-delay:.7s}
+html.lx-intro-on{overflow:hidden}
+html.lx-intro-on .lx-hero *{animation-play-state:paused!important}
+/* the hero settles in after the iris opens */
+.lx-hero .lx-dial{animation:lxIn 1.6s cubic-bezier(.2,.7,.2,1) both}
+.lx-hero h1,.lx-hero .ar,.lx-hero .meta{animation:lxUp 1.2s cubic-bezier(.2,.7,.2,1) both}
+.lx-hero .ar{animation-delay:.12s}.lx-hero .meta{animation-delay:.24s}
+@keyframes lxIn{from{opacity:0;transform:scale(.86) rotate(-20deg)}}
+@keyframes lxUp{from{opacity:0;transform:translateY(24px);letter-spacing:.3em}}
 
 /* hero */
 .lx-hero{position:relative;min-height:calc(100vh - 77px);display:grid;place-items:center;overflow:hidden;isolation:isolate;background:radial-gradient(ellipse 60% 55% at 50% 48%,#2a1d10 0%,#140e08 45%,var(--lx-bg) 75%)}
@@ -73,6 +108,11 @@ body{background:var(--lx-bg);color:var(--lx-ink)}
 .lx-nav a em{font:italic 400 15px var(--f-display);color:var(--lx-gold)}
 .lx-nav a span{font:600 9px var(--f-ui);letter-spacing:.3em;text-transform:uppercase;opacity:.7}
 .lx-nav a:hover{color:var(--lx-ink);background:rgba(201,169,110,.08)}
+.lx-cover{position:relative;margin-top:90px;height:min(62vh,560px);overflow:hidden;border:1px solid var(--lx-line)}
+.lx-cover img{width:100%;height:100%;object-fit:cover;transform:scale(1.15);transition:transform 2.4s cubic-bezier(.2,.7,.2,1)}
+.lx-cover.in img{transform:scale(1)}
+.lx-cover::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,8,6,.1),rgba(10,8,6,.85))}
+.lx-cover+.lx-sec-h{padding-top:0;margin-top:-120px;position:relative;z-index:2}
 .lx-sec{scroll-margin-top:150px}
 .lx-sec-h{text-align:center;padding:110px 0 10px;display:flex;flex-direction:column;align-items:center;gap:10px;border-bottom:1px solid var(--lx-line)}
 .lx-sec-h h2{font:italic 400 clamp(56px,8vw,120px)/1 var(--f-display)}
@@ -155,13 +195,36 @@ body{background:var(--lx-bg);color:var(--lx-ink)}
 </style>
 </head>
 <body>
+<div class="lx-intro" id="lxIntro" aria-hidden="true">
+  <div class="lxi-c">
+    <svg class="lxi-dial" viewBox="0 0 200 200"><circle class="lxi-ring" cx="100" cy="100" r="86"/><circle class="lxi-ring2" cx="100" cy="100" r="92"/><g class="lxi-ticks"></g><line class="lxi-hand" x1="100" y1="100" x2="100" y2="22"/><circle cx="100" cy="100" r="2.6" fill="#E9D3A3"/></svg>
+    <div class="lxi-word en">DAQQA <em>Privé</em></div>
+    <div class="lxi-cap en">THE LUXURY COLLECTION</div>
+  </div>
+</div>
+<script>
+(function () {
+  var el = document.getElementById('lxIntro'), reduce = matchMedia('(prefers-reduced-motion: reduce)').matches, quick = false;
+  try { quick = sessionStorage.getItem('dq-lx') === '1'; sessionStorage.setItem('dq-lx', '1'); } catch (e) {}
+  window.DQ_NO_INTRO = true;
+  if (reduce) { el.remove(); return; }
+  var g = el.querySelector('.lxi-ticks'), t = '';
+  for (var i = 0; i < 60; i++) { var a = i * 6 * Math.PI / 180, big = i % 5 === 0, r1 = big ? 72 : 77, r2 = 81; t += '<line style="--i:' + i + '" x1="' + (100 + r1 * Math.sin(a)) + '" y1="' + (100 - r1 * Math.cos(a)) + '" x2="' + (100 + r2 * Math.sin(a)) + '" y2="' + (100 - r2 * Math.cos(a)) + '" class="' + (big ? 'b' : '') + '"/>'; }
+  g.innerHTML = t;
+  if (quick) el.classList.add('quick');
+  document.documentElement.classList.add('lx-intro-on');
+  var done = function () { el.classList.add('open'); document.documentElement.classList.remove('lx-intro-on'); setTimeout(function () { el.remove(); }, 1300); };
+  var T = setTimeout(done, quick ? 1300 : 2900);
+  el.addEventListener('click', function () { clearTimeout(T); done(); });
+})();
+</script>
 <div id="hdr"></div>
 <main id="page"><section class="lx-hero"><div class="lx-center"><div class="skeleton" style="width:320px;height:320px;border-radius:50%;opacity:.3"></div></div></section></main>
 <div id="ftr"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="assets/config.js?v=20261018i"></script>
-<script src="assets/app.js?v=20261018i"></script>
+<script src="assets/config.js?v=20261018j"></script>
+<script src="assets/app.js?v=20261018j"></script>
 <script>
 const { esc, money, finalPrice, discountPct } = RC;
 const ORDER = Object.keys(RC.kinds); // watches first
@@ -171,6 +234,7 @@ DQ.start('luxury', () => {
   const all = DQ.pageItems('luxury').sort((a, b) => (ORDER.indexOf(RC.kindOf(a)) - ORDER.indexOf(RC.kindOf(b))) || (b.featured - a.featured) || (finalPrice(b) - finalPrice(a)));
   // no luxury pieces with photos → the page doesn't exist
   if (!all.length && !DQ.loadError) return location.replace('./');
+  const COV = DQ.settings.banners || {};
   const hero = all.find(p => RC.kindOf(p) === 'watches') || all[0];
   const kinds = ORDER.filter(k => all.some(p => RC.kindOf(p) === k));
   const gens = [['men', 'رجالي'], ['women', 'حريمي']];
@@ -199,7 +263,7 @@ DQ.start('luxury', () => {
     <div class="lx-center">
       <a class="lx-dial" href="${RC.productUrl(hero)}" data-pid="${hero.id}" aria-label="${esc(hero.name)}">
         <svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="48.5" fill="none" stroke="#C9A96E" stroke-width=".25"/>${ticks()}</svg>
-        <span class="glow"></span><span class="pic ph"><img src="${DQ.img(hero)}" alt=""></span>
+        <span class="glow"></span><span class="pic ph"><img src="${esc(COV.luxury && COV.luxury.hero || DQ.img(hero))}" alt=""></span>
       </a>
       <h1 class="gold">DAQQA <em>Privé</em></h1>
       <div class="ar">الفخامة في كل دقّة.</div>
@@ -221,7 +285,8 @@ DQ.start('luxury', () => {
     const list = all.filter(p => filter === 'all' || p.category === filter.slice(2) || p.category === 'unisex');
     // one section per kind (watches first), each with its own chapter numbers
     document.getElementById('chapters').innerHTML = kinds.map((k, n) => { const items = list.filter(p => RC.kindOf(p) === k); if (!items.length) return '';
-      return `<section class="lx-sec" id="lx-${k}"><header class="lx-sec-h op op-stagger"><span class="lx-cap">N° ${['I', 'II', 'III'][n]} · DAQQA PRIVÉ</span><h2 class="gold en">${RC.kinds[k].en}</h2><p>${RC.kinds[k].ar}</p></header>${items.map(chapter).join('')}</section>`; }).join('') || `<p class="lx-none">مفيش قطع ${filter === 'g:men' ? 'رجالي' : 'حريمي'} في المجموعة دي دلوقتي — قريب.</p>`;
+      const cv = (COV['lux-' + k] || {}).hero;
+      return `<section class="lx-sec" id="lx-${k}">${cv ? `<div class="lx-cover op op-curtain"><img src="${esc(cv)}" alt="" loading="lazy"></div>` : ''}<header class="lx-sec-h op op-stagger"><span class="lx-cap">N° ${['I', 'II', 'III'][n]} · DAQQA PRIVÉ</span><h2 class="gold en">${RC.kinds[k].en}</h2><p>${RC.kinds[k].ar}</p></header>${items.map(chapter).join('')}</section>`; }).join('') || `<p class="lx-none">مفيش قطع ${filter === 'g:men' ? 'رجالي' : 'حريمي'} في المجموعة دي دلوقتي — قريب.</p>`;
     DQ.reveal();
   };
   const f = document.querySelector('.lx-filters');

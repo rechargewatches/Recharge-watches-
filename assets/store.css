@@ -438,9 +438,13 @@ textarea.input.addr{min-height:120px;line-height:1.7}
 
 /* ---------- smooth page-to-page transitions ---------- */
 @view-transition{navigation:auto}
-html:not(.vt-theme)::view-transition-old(root){animation:pgOut .38s cubic-bezier(.4,0,.2,1) both}
-html:not(.vt-theme)::view-transition-new(root){animation:pgIn .6s cubic-bezier(.2,.7,.2,1) both}
-@keyframes pgOut{to{opacity:0;transform:scale(.985);filter:blur(4px)}}
+/* the new page is revealed by a clock hand sweeping one full turn; the old one dims away */
+@property --sweep{syntax:"<angle>";inherits:false;initial-value:0deg}
+html:not(.vt-theme)::view-transition-group(root){animation-duration:.95s}
+html:not(.vt-theme)::view-transition-old(root){animation:pgOut .95s cubic-bezier(.5,0,.3,1) both}
+html:not(.vt-theme)::view-transition-new(root){animation:pgSweep .95s cubic-bezier(.65,0,.25,1) both;-webkit-mask:conic-gradient(from 0deg at 50% 50%,#000 var(--sweep),transparent calc(var(--sweep) + .5deg));mask:conic-gradient(from 0deg at 50% 50%,#000 var(--sweep),transparent calc(var(--sweep) + .5deg))}
+@keyframes pgSweep{from{--sweep:0deg}to{--sweep:360deg}}
+@keyframes pgOut{to{opacity:.25;transform:scale(.97);filter:blur(3px) brightness(.6)}}
 @keyframes pgIn{from{opacity:0;transform:translateY(14px) scale(1.01);filter:blur(6px)}}
 /* browsers without cross-page view transitions: fade in on load, fade out on leave */
 html.pg-fx body{animation:pgIn .6s cubic-bezier(.2,.7,.2,1) both}

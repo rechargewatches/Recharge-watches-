@@ -18,8 +18,8 @@
 <link rel="apple-touch-icon" href="assets/icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Archivo:wght@400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/base.css?v=20261018i">
-<link rel="stylesheet" href="assets/store.css?v=20261018i">
+<link rel="stylesheet" href="assets/base.css?v=20261018j">
+<link rel="stylesheet" href="assets/store.css?v=20261018j">
 <style>
 .c-hero{position:relative;overflow:hidden;background:radial-gradient(ellipse at 80% 0%,rgb(var(--accent-rgb)/.16),transparent 60%),var(--hero);border-bottom:1px solid var(--line)}
 .c-hero .wrap{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;min-height:360px;padding-top:56px;padding-bottom:56px}
@@ -32,6 +32,10 @@
 .c-hero p{color:var(--muted);margin-top:12px;max-width:440px}
 .c-hero .count{display:inline-flex;gap:10px;margin-top:22px;font:600 12px var(--f-ui);letter-spacing:.2em;color:var(--muted)}
 .c-hero .count b{color:var(--ink)}
+.c-cover{position:absolute;inset:0;background-size:cover;background-position:center;animation:cZoom 14s ease-out both}
+.c-hero.has-cover::after{content:"";position:absolute;inset:0;background:linear-gradient(270deg,rgba(14,10,6,.88) 0%,rgba(14,10,6,.55) 45%,rgba(14,10,6,.1) 100%)}
+.c-hero.has-cover .wrap{z-index:2;min-height:440px}.c-hero.has-cover h1,.c-hero.has-cover .mini-brand b{color:#F5F0E8}.c-hero.has-cover p,.c-hero.has-cover .count{color:#D8CBB8}.c-hero.has-cover .count b{color:#fff}
+@keyframes cZoom{from{transform:scale(1.12)}}
 .c-stack{position:relative;height:300px}
 .c-stack img{position:absolute;width:52%;aspect-ratio:4/5;object-fit:cover;border-radius:24px;box-shadow:0 40px 70px -30px rgba(0,0,0,.6);border:1px solid rgb(var(--accent-rgb)/.25);transition:transform .9s cubic-bezier(.2,.7,.2,1)}
 .c-stack img:nth-child(1){left:24%;top:-10%;z-index:3;transform:rotate(-3deg)}
@@ -63,8 +67,8 @@
 <div id="ftr"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="assets/config.js?v=20261018i"></script>
-<script src="assets/app.js?v=20261018i"></script>
+<script src="assets/config.js?v=20261018j"></script>
+<script src="assets/app.js?v=20261018j"></script>
 <script>
 const { esc, finalPrice, discountPct } = RC;
 const C = new URLSearchParams(location.search).get('c');
@@ -85,9 +89,9 @@ DQ.start(PAGE, () => {
   document.getElementById('ogTitle').content = document.title;
   document.getElementById('canon').href = location.origin + location.pathname + '?c=' + PAGE;
   const kinds = Object.keys(RC.kinds).filter(k => all.some(p => RC.kindOf(p) === k));
-  const pics = all.slice(0, 3);
+  const pics = all.slice(0, 3), cover = ((DQ.settings.banners || {})[PAGE] || {}).hero;
   document.getElementById('page').innerHTML = `
-  <section class="c-hero" data-glow><div class="big" aria-hidden="true">${V.en.toUpperCase()}</div><div class="wrap">
+  <section class="c-hero ${cover ? 'has-cover' : ''}" data-glow>${cover ? `<div class="c-cover" style="background-image:url('${esc(cover)}')"></div>` : ''}<div class="big" aria-hidden="true">${V.en.toUpperCase()}</div><div class="wrap">
     <div class="op op-stagger">
       <div class="mini-brand"><b>DAQQA</b><small>${V.en.toUpperCase()}</small></div>
       <h1 class="en" dir="ltr" style="text-align:right">${K.en}</h1>
@@ -95,7 +99,7 @@ DQ.start(PAGE, () => {
       <p>${K.sub}</p>
       <div class="count en"><b>${all.length}</b> PIECES · ${kinds.map(k => RC.kinds[k].en.toUpperCase()).join(' · ')}</div>
     </div>
-    <div class="c-stack op op-curtain" aria-hidden="true">${pics.map(p => `<img src="${DQ.img(p)}" alt="">`).join('')}</div>
+    ${cover ? '' : `<div class="c-stack op op-curtain" aria-hidden="true">${pics.map(p => `<img src="${DQ.img(p)}" alt="">`).join('')}</div>`}
   </div></section>
   <section class="strip" data-glow><div class="wrap">
     <div class="c-bar">
