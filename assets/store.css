@@ -398,7 +398,7 @@ textarea.input.addr{min-height:120px;line-height:1.7}
 /* ---------- LUXURY button: its own glowing gold piece in the header ---------- */
 .lux-btn{position:relative;flex:none;display:inline-flex;align-items:center;gap:10px;height:40px;padding:0 20px 0 18px;border-radius:999px;isolation:isolate;overflow:hidden;
   background:linear-gradient(120deg,#120c06,#2a1c0e 45%,#120c06);color:#F2E3C2;border:1px solid transparent;
-  box-shadow:0 0 0 1px rgba(201,169,110,.55) inset,0 0 18px rgba(201,169,110,.35),0 8px 26px -10px rgba(201,169,110,.55);animation:luxGlow 3.2s ease-in-out infinite;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+  box-shadow:0 0 0 1px rgba(201,169,110,.55) inset,0 0 18px rgba(201,169,110,.35),0 8px 26px -10px rgba(201,169,110,.55);animation:luxGlow 3.2s ease-in-out infinite,luxPulse 2.4s ease-in-out infinite;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
 .lux-btn span{font:600 11px var(--f-ui);letter-spacing:.42em;padding-left:.42em;background:linear-gradient(100deg,#9c7642,#f6e3b5 35%,#c9a96e 55%,#f6e3b5 75%,#9c7642);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:luxSheen 4s linear infinite}
 .lux-btn i{width:7px;height:7px;transform:rotate(45deg);background:linear-gradient(135deg,#f6e3b5,#a77d43);box-shadow:0 0 10px #e9c98a}
 .lux-btn::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;background:conic-gradient(from var(--la,0deg),transparent 0 60%,#f6e3b5 75%,transparent 90%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:luxSpin 3.5s linear infinite;z-index:-1}
@@ -410,6 +410,7 @@ textarea.input.addr{min-height:120px;line-height:1.7}
 @keyframes luxSpin{to{--la:360deg}}
 @keyframes luxSheen{to{background-position:-220% 0}}
 @keyframes luxSweep{0%,55%{left:-60%}100%{left:130%}}
+@keyframes luxPulse{0%,100%{scale:1}14%{scale:1.05}28%{scale:1}42%{scale:1.03}60%{scale:1}}
 @keyframes luxGlow{50%{box-shadow:0 0 0 1px rgba(233,201,138,.8) inset,0 0 30px rgba(233,201,138,.5),0 8px 30px -8px rgba(201,169,110,.7)}}
 .lux-row{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;margin:6px 0 18px;padding:18px;border-radius:18px;overflow:hidden;background:linear-gradient(120deg,#120c06,#2a1c0e 50%,#120c06);box-shadow:0 0 0 1px rgba(201,169,110,.55) inset,0 0 24px rgba(201,169,110,.3);animation:luxGlow 3.2s ease-in-out infinite}
 .lux-row span{font:600 18px var(--f-ui);letter-spacing:.5em;padding-left:.5em;background:linear-gradient(100deg,#9c7642,#f6e3b5 35%,#c9a96e 55%,#f6e3b5 75%,#9c7642);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:luxSheen 4s linear infinite}
@@ -422,7 +423,7 @@ textarea.input.addr{min-height:120px;line-height:1.7}
 .menu-tools .i-moon{display:none}
 :root[data-theme="light"] .menu-tools .i-sun{display:none}:root[data-theme="light"] .menu-tools .i-moon{display:inline}
 @media (min-width:901px){.lux-row,.menu-tools{display:none}}
-@media (max-width:900px){#themeBtn,#favBtn{display:none}}
+@media (max-width:900px){#favBtn{display:none}}
 @media (max-width:560px){#searchBtn,#accBtn{display:none}.nav{gap:10px}.lux-btn{height:32px;padding:0 12px 0 10px;gap:7px}.lux-btn span{font-size:9px;letter-spacing:.3em;padding-left:.3em}.lux-btn i{width:5px;height:5px}}
 @media (max-width:380px){.lux-btn i{display:none}.lux-btn{padding:0 10px}.brand{gap:8px}.brand .wm b{font-size:16px;letter-spacing:.28em}.brand .wm small{letter-spacing:.45em}}
 @media (prefers-reduced-motion:reduce){.lux-btn,.lux-btn span,.lux-btn::before,.lux-btn::after,.lux-row,.lux-row span,.lux-row::after{animation:none}}
@@ -512,3 +513,7 @@ html.pg-leave body{transition:opacity .3s,filter .3s,transform .3s;opacity:0;fil
 :root.lux,:root.lux-mode{--L-bg:#0A0806;--L-bg2:#120D08;--L-bg3:#1d140b;--L-deep:#060504;--L-glow:#2a1d10;--L-ink:#F2E9D8;--L-mute:#A39479;--L-dim:#7d6f5b;--L-gold:#C9A96E;--L-gold2:#E9D3A3;--L-gold3:#8C6A3A;--L-gold4:#F6E3B5;--L-on:#140E08;--L-rgb:201 169 110;--L-bgrgb:10 8 6;--L-hi-rgb:233 211 163}
 :root.lux[data-theme="light"],:root.lux-mode[data-theme="light"]{--L-bg:#F7F1E7;--L-bg2:#EFE5D3;--L-bg3:#F2E8D8;--L-deep:#E8DCC6;--L-glow:#E9D6B4;--L-ink:#1A130B;--L-mute:#66553E;--L-dim:#8A7860;--L-gold:#8F672E;--L-gold2:#B4833F;--L-gold3:#5E3F14;--L-gold4:#A9783A;--L-on:#FBF6EE;--L-rgb:143 103 46;--L-bgrgb:247 241 231;--L-hi-rgb:180 131 63}
 :root.lux[data-theme="light"] .lux-btn,:root.lux-mode[data-theme="light"] .lux-btn{color:#F2E3C2}
+
+/* mobile header: theme toggle stays visible next to the cart */
+@media (max-width:560px){#themeBtn{display:grid}.menu-tools #mTheme{display:none}.menu-tools{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:400px){.actions{gap:3px}.actions .icon-btn{width:34px;height:34px}.actions .icon-btn svg{width:17px;height:17px}.brand .m{width:30px;height:31px}.brand .wm b{font-size:15px;letter-spacing:.24em}.lux-btn{height:30px;padding:0 9px}.lux-btn span{font-size:8.5px;letter-spacing:.24em}}
