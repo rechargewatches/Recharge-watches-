@@ -28,14 +28,20 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Archivo:wght@400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/base.css?v=20261018n">
-<link rel="stylesheet" href="assets/store.css?v=20261018n">
+<link rel="stylesheet" href="assets/base.css?v=20261018o">
+<link rel="stylesheet" href="assets/store.css?v=20261018o">
 <style>
 
 /* ---------- desktop landing: scroll through the Q ---------- */
 .landing{position:relative;z-index:5;overflow:clip;height:320vh;margin-bottom:-100vh;pointer-events:none}
 .ld-stick{position:sticky;top:0;height:100vh;overflow:hidden;display:grid;place-items:center;box-sizing:border-box;padding:0 0 calc(var(--navh,0px) + 84px);background:var(--bg);pointer-events:auto}
 .ld-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 46%,rgb(var(--accent-rgb)/.16),transparent 55%),radial-gradient(circle at var(--mx,50%) var(--my,50%),rgb(var(--accent-rgb)/.14),transparent 30%)}
+.ld-motto{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;overflow:hidden;padding-bottom:calc(var(--navh,0px) + 84px)}
+.ld-motto span{font:700 clamp(90px,10.5vw,190px)/1 'Amiri',var(--f-ar);white-space:nowrap;color:rgb(var(--accent-rgb)/.035);-webkit-text-stroke:1px rgb(var(--accent-rgb)/.09);letter-spacing:0;transform:translateY(6%);animation:ldMotto 2.4s cubic-bezier(.2,.7,.2,1) .2s both,ldDrift 18s ease-in-out 2.6s infinite alternate}
+@keyframes ldMotto{from{opacity:0;filter:blur(14px);transform:translateY(6%) scale(1.08)}}
+@keyframes ldDrift{to{transform:translateY(6%) translateX(-2.5%)}}
+:root[data-theme="light"] .ld-motto span{color:rgb(var(--accent-rgb)/.04);-webkit-text-stroke:1px rgb(var(--accent-rgb)/.1)}
+@media (max-width:900px){.ld-motto{display:none}}
 .ld-grid{position:absolute;inset:0;background-image:linear-gradient(rgb(var(--accent-rgb)/.05) 1px,transparent 1px),linear-gradient(90deg,rgb(var(--accent-rgb)/.05) 1px,transparent 1px);background-size:64px 64px;mask-image:radial-gradient(ellipse at center,#000 20%,transparent 70%)}
 .ld-c{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:0}
 .ld-slot{position:relative;width:min(19vh,170px);aspect-ratio:184/190}
@@ -212,7 +218,7 @@
 </head>
 <body>
 <div id="hdr"></div>
-<section class="landing" id="landing" aria-label="DAQQA"><div class="ld-stick"><div class="ld-bg"></div><div class="ld-grid"></div>
+<section class="landing" id="landing" aria-label="DAQQA"><div class="ld-stick"><div class="ld-bg"></div><div class="ld-grid"></div><div class="ld-motto ld-fade" aria-hidden="true"><span>دقّت ساعة العمل</span></div>
   <span class="ld-side l en ld-fade">PRECISION IN EVERY TICK</span><span class="ld-side r en ld-fade">EST. 2026 · CAIRO</span>
   <div class="ld-c"><div class="ld-slot"><div class="ld-dial" id="ldDial"></div></div><div class="ld-time en ld-fade" aria-live="off"><span id="ldClock">--:--:--</span><b id="ldAP">PM</b><i>CAIRO</i></div><h1 class="ld-word en" id="ldWord" aria-label="DAQQA"><span>D</span><span>A</span><span>Q</span><span>Q</span><span>A</span></h1><div class="ld-sep ld-fade" aria-hidden="true"><span></span><i></i><span></span></div><div class="ld-ar ld-fade" lang="ar">دقّة</div><div class="ld-beats ld-fade"><small class="en">3 DAQQAT <em>·</em> <span lang="ar">٣ دقّات</span></small><nav aria-label="الأقسام"><a href="#watches" data-kind="watches"><i class="en">01</i>ساعات</a><a href="#glasses" data-kind="glasses"><i class="en">02</i>نضارات</a><a href="#accessories" data-kind="accessories"><i class="en">03</i>اكسسوارات</a></nav></div></div>
   <div class="ld-scroll ld-fade"><span class="mouse"><i></i></span><b>اسكرول لتحت</b><small class="en">SCROLL</small></div>
@@ -221,8 +227,8 @@
 <div id="ftr"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="assets/config.js?v=20261018n"></script>
-<script src="assets/app.js?v=20261018n"></script>
+<script src="assets/config.js?v=20261018o"></script>
+<script src="assets/app.js?v=20261018o"></script>
 <script>
 const { discountPct, esc } = RC;
 const $ = s => document.querySelector(s);
