@@ -208,6 +208,7 @@ main{flex:1;min-width:0;padding:28px 32px 60px}
 .tab.tab-lux.on{background:linear-gradient(120deg,rgba(201,169,110,.18),rgba(201,169,110,.06));color:#F2E3C2;box-shadow:inset 0 0 0 1px rgba(201,169,110,.35)}
 .scope-seg button.on.en{background:linear-gradient(120deg,#9c7642,#C9A96E);color:#140E08}
 .mob-tabs .tab-h{display:none}
+.ord-scope{margin-bottom:10px;flex-wrap:wrap;gap:10px}
 .cov-panel{margin-bottom:14px}
 .bslot .re{position:absolute;bottom:6px;left:6px;font-size:11px;padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.65);color:#fff}
 .lux-h{background:linear-gradient(100deg,#9c7642,#f6e3b5 40%,#c9a96e 60%,#9c7642);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.12em}
@@ -302,7 +303,11 @@ const TABS = [['dash','المبيعات'],
 const MOB_TABS = ['dash','orders','products','lux-orders','lux','settings'];
 // an order counts as Luxury when any of its pieces is a Luxury product
 const isLuxOrder = o => (o.shop_order_items || []).some(i => { const p = products.find(x => x.id === i.product_id); return p && RC.isLuxury(p); });
-let dashScope = 'all';
+let dashScope = 'all', orderKind = 'all', orderGen = 'all';
+// which sections / genders an order touches (from its products)
+const orderProds = o => (o.shop_order_items || []).map(i => products.find(x => x.id === i.product_id)).filter(Boolean);
+const orderHasKind = (o, k) => orderProds(o).some(p => RC.kindOf(p) === k);
+const orderHasGen = (o, g) => orderProds(o).some(p => p.category === g || p.category === 'unisex');
 // product pages in the admin: each one is a filtered view of the same products table
 const SCOPES = {
   products: { title: 'المنتجات العادية', sub: 'كل المنتجات اللي في المتجر العادي (من غير Luxury)', test: p => !RC.isLuxury(p), init: { luxury: false } },
@@ -474,17 +479,21 @@ function renderDash() {
 
 /* ---------- orders ---------- */
 function renderOrders() {
-  const LUXT = tab === 'lux-orders', ORD = orders.filter(o => isLuxOrder(o) === LUXT);
+  const LUXT = tab === 'lux-orders', ORD0 = orders.filter(o => isLuxOrder(o) === LUXT), ORD = ORD0.filter(o => (orderKind === 'all' || orderHasKind(o, orderKind)) && (orderGen === 'all' || orderHasGen(o, orderGen)));
   const q = orderQuery.trim().toLowerCase();
   const list = ORD.filter(o => (orderFilter === 'all' || o.status === orderFilter) && (!q || [o.code, o.customer_name, o.phone, o.city].join(' ').toLowerCase().includes(q)));
   const counts = Object.fromEntries(STATUS_KEYS.map(k => [k, ORD.filter(o => o.status === k).length]));
   $('#main').innerHTML = `
     <div class="head"><div><h1 ${LUXT ? 'class="en lux-h"' : ''}>${LUXT ? 'Luxury Orders' : 'الطلبات'}</h1><div class="sub">${ORD.length} طلب · بيوصلك إشعار وصوت مع كل طلب جديد</div></div></div>
+    <div class="toolbar ord-scope"><div class="seg" id="okSeg"><button data-ok="all" class="${orderKind==='all'?'on':''}">كل الأقسام <span class="en">${ORD0.length}</span></button>${Object.entries(RC.kinds).map(([k, v]) => `<button data-ok="${k}" class="${orderKind===k?'on':''}">${v.ar} <span class="en">${ORD0.filter(o => orderHasKind(o, k)).length}</span></button>`).join('')}</div>
+      <div class="seg" id="ogSeg">${[['all','الكل'],['men','رجالي'],['women','حريمي']].map(([g, l]) => `<button data-og="${g}" class="${orderGen===g?'on':''}">${l}${g === 'all' ? '' : ` <span class="en">${ORD0.filter(o => orderHasGen(o, g)).length}</span>`}</button>`).join('')}</div></div>
     <div class="toolbar">
       <div class="seg" id="ordSeg"><button data-of="all" class="${orderFilter==='all'?'on':''}">الكل</button>${STATUS_KEYS.map(k => `<button data-of="${k}" class="${orderFilter===k?'on':''}">${statuses[k]} <span class="en">${counts[k]}</span></button>`).join('')}</div>
       <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="oq" placeholder="بحث بالاسم أو الرقم أو الكود" value="${esc(orderQuery)}"></label>
     </div>
     <div class="orders">${list.length ? list.map(orderHTML).join('') : '<div class="panel empty">مفيش طلبات هنا.</div>'}</div>`;
+  $('#okSeg').onclick = e => { const x = e.target.closest('[data-ok]'); if (x) { orderKind = x.dataset.ok; renderOrders(); } };
+  $('#ogSeg').onclick = e => { const x = e.target.closest('[data-og]'); if (x) { orderGen = x.dataset.og; renderOrders(); } };
   $('#ordSeg').onclick = e => { const b = e.target.closest('[data-of]'); if (b) { orderFilter = b.dataset.of; renderOrders(); } };
   const oq = $('#oq'); oq.oninput = () => { orderQuery = oq.value; clearTimeout(oq._t); oq._t = setTimeout(() => { renderOrders(); const n = $('#oq'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); }, 250); };
   freshIds.clear();
