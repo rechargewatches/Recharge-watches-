@@ -71,9 +71,10 @@
   DQ.renderFavs = renderFavs;
   DQ.card = (p, i = 0) => {
     const off = discountPct(p), url = RC.productUrl(p), cols = RC.colors(p), fav = DQ.favs && DQ.favs.has(p.id);
-    return `<article class="card reveal" style="transition-delay:${Math.min(i, 8) * 50}ms">
+    const nImg = (p.images || []).length;
+    return `<article class="card reveal" data-pid="${p.id}" style="transition-delay:${Math.min(i, 8) * 50}ms">
       <a class="ph" href="${url}" tabindex="-1" aria-hidden="true"><img loading="lazy" src="${DQ.img(p)}" alt="" onerror="this.src='${FALLBACK}'">${p.images && p.images[1] ? `<img class="alt" loading="lazy" src="${DQ.img(p, 1)}" alt="">` : ''}
-        ${off ? `<span class="badge-off">-${off}%</span>` : ''}${p.stock <= 0 ? `<div class="out">نفدت الكمية</div>` : ''}</a>
+        ${nImg > 1 ? `<span class="ph-dots" aria-hidden="true">${'<i></i>'.repeat(Math.min(nImg, 6))}</span>` : ''}${off ? `<span class="badge-off">-${off}%</span>` : ''}${p.stock <= 0 ? `<div class="out">نفدت الكمية</div>` : ''}</a>
       <button class="fav ${fav ? 'on' : ''}" data-fav="${p.id}" aria-pressed="${fav}" aria-label="أضف ${esc(p.name)} للمفضلة">${ICON.heart}</button>
       <div class="bd"><h3 class="en"><a href="${url}">${esc(p.name)}</a></h3>
         <span class="sku en">${RC.sku(p)}${p.style ? ' · ' + esc(p.style) : ''}</span>
@@ -83,13 +84,40 @@
   };
   DQ.wa = () => (DQ.settings.whatsapp || '').replace(/\D/g, '');
 
+  /* ---------- hover: a product with several photos flips through them ---------- */
+  function imageFlip() {
+    if (!matchMedia('(hover: hover)').matches) return;
+    let cur = null, timer = null;
+    const stop = () => { if (!cur) return; clearInterval(timer); const c = cur; cur = null; c.classList.remove('flipping'); const img = c.querySelector('.ph img:not(.alt)'), p = DQ.byId(+c.dataset.pid);
+      if (img && p) img.src = DQ.img(p, 0); c.querySelectorAll('.ph-dots i').forEach((d, j) => d.classList.toggle('on', j === 0)); };
+    document.addEventListener('pointerover', e => {
+      const c = e.target.closest && e.target.closest('[data-pid]');
+      if (c === cur) return; stop();
+      const p = c && DQ.byId(+c.dataset.pid); if (!p || !p.images || p.images.length < 2) return;
+      cur = c; c.classList.add('flipping'); let i = 0; const img = c.querySelector('.ph img:not(.alt), [data-flip]'), dots = c.querySelectorAll('.ph-dots i');
+      p.images.slice(1).forEach(u => { const im = new Image(); im.src = u; });
+      const step = () => { i = (i + 1) % p.images.length; img.classList.add('swap'); setTimeout(() => { img.src = DQ.img(p, i); img.classList.remove('swap'); }, 180); dots.forEach((d, j) => d.classList.toggle('on', j === i % dots.length)); };
+      dots.forEach((d, j) => d.classList.toggle('on', j === 0));
+      setTimeout(() => cur === c && step(), 350); timer = setInterval(step, 1100);
+    });
+  }
+
+  /* ---------- pages menu (Luxury / Men / Women) ---------- */
+  function pagesMenu(active) {
+    const on = RC.pages[active] ? 'on' : '';
+    return `<div class="pg-menu" data-pages><button type="button" class="pg-btn ${on}" aria-haspopup="true" aria-expanded="false">الصفحات <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+      <div class="pg-drop" role="menu">${Object.entries(RC.pages).map(([k, v]) => `<a role="menuitem" href="${v.href}" data-page="${k}" class="${k === 'luxury' ? 'lux' : ''} ${k === active ? 'on' : ''}"><b>${v.ar}</b><small class="en">${k === 'luxury' ? 'DAQQA PRIVÉ' : v.en.toUpperCase()}</small></a>`).join('')}</div></div>`;
+  }
+  DQ.livePages = () => Object.keys(RC.pages).filter(k => DQ.products.some(p => RC.pages[k].test(p) && p.images && p.images.length));
+  DQ.pageItems = k => DQ.products.filter(p => RC.pages[k].test(p) && p.images && p.images.length);
+
   /* ---------- chrome: header, sheets, footer, drawer ---------- */
   function chrome(active) {
     const nav = [['./', 'الرئيسية', 'home'], ['./#watches', 'الساعات', 'watches'], ['./#glasses', 'النضارات', 'glasses'], ['./#accessories', 'الاكسسوارات', 'accessories']];
     $('#hdr').innerHTML = `
       <header class="nav-bar"><div class="wrap nav">
         <a href="./" class="brand" aria-label="DAQQA — الرئيسية"><span class="m">${RC.logo()}</span><span class="wm"><b>DAQQA</b><small>WATCHES</small></span></a>
-        <nav class="links" aria-label="القائمة">${nav.map(([h, l, k]) => `<a href="${h}" data-kind="${k}" class="${k === active ? 'on' : ''}">${l}</a>`).join('')}</nav>
+        <nav class="links" aria-label="القائمة">${nav.map(([h, l, k]) => `<a href="${h}" data-kind="${k}" class="${k === active ? 'on' : ''}">${l}</a>`).join('')}${pagesMenu(active)}</nav>
         <div class="actions">
           <button class="icon-btn theme-btn" id="themeBtn" aria-label="تغيير الوضع"><span class="i-sun">${ICON.sun}</span><span class="i-moon">${ICON.moon}</span></button>
           <button class="icon-btn" id="searchBtn" aria-label="بحث">${ICON.search}</button>
@@ -99,7 +127,7 @@
           <button class="icon-btn menu-btn" id="menuBtn" aria-label="القائمة">${ICON.menu}</button>
         </div></div></header>
       <div class="sheet" id="menuSheet" role="dialog" aria-label="القائمة"><div class="wrap sheet-head"><a href="./" class="brand"><span class="m">${RC.logo()}</span><span class="wm"><b>DAQQA</b><small>WATCHES</small></span></a><button class="icon-btn" data-close aria-label="إغلاق">${ICON.close}</button></div>
-        <div class="wrap sheet-body"><nav class="menu-list">${nav.map(([h, l, k]) => `<a href="${h}" data-kind="${k}" data-close>${l}<span class="en">${RC.kinds[k] ? RC.kinds[k].en.toUpperCase() : '→'}</span></a>`).join('')}</nav></div></div>
+        <div class="wrap sheet-body"><nav class="menu-list">${nav.map(([h, l, k]) => `<a href="${h}" data-kind="${k}" data-close>${l}<span class="en">${RC.kinds[k] ? RC.kinds[k].en.toUpperCase() : '→'}</span></a>`).join('')}<div class="menu-pages" data-pages><small class="en">PAGES</small>${Object.entries(RC.pages).map(([k, v]) => `<a href="${v.href}" data-page="${k}" class="${k === 'luxury' ? 'lux' : ''}" data-close>${v.ar}<span class="en">${v.en.toUpperCase()}</span></a>`).join('')}</div></nav></div></div>
       <div class="sheet" id="favSheet" role="dialog" aria-label="المفضلة"><div class="wrap sheet-head"><b style="font-size:18px">المفضلة</b><button class="icon-btn" data-close aria-label="إغلاق">${ICON.close}</button></div><div class="wrap sheet-body"><div class="search-res" id="favRes"></div></div></div>
       <div class="sheet" id="accSheet" role="dialog" aria-label="حسابي"><div class="wrap sheet-head"><b style="font-size:18px" id="accTitle">حسابي</b><button class="icon-btn" data-close aria-label="إغلاق">${ICON.close}</button></div><div class="wrap sheet-body"><div class="acc" id="accBody"></div></div></div>
       <div class="sheet" id="searchSheet" role="dialog" aria-label="بحث"><div class="wrap sheet-head"><b style="font-size:18px">بحث</b><button class="icon-btn" data-close aria-label="إغلاق">${ICON.close}</button></div>
@@ -125,6 +153,12 @@
     $('#searchBtn').onclick = () => { openSheet('#searchSheet'); setTimeout(() => $('#searchInput').focus(), 80); };
     $('#searchInput').oninput = e => renderSearch(e.target.value);
     $('#overlay').onclick = DQ.closeAll;
+    const pm = document.querySelector('.links .pg-menu');
+    if (pm) { const b = pm.querySelector('.pg-btn'); const set = v => { pm.classList.toggle('open', v); b.setAttribute('aria-expanded', v); };
+      b.onclick = e => { e.stopPropagation(); set(!pm.classList.contains('open')); };
+      pm.onmouseenter = () => matchMedia('(hover: hover)').matches && set(true); pm.onmouseleave = () => set(false);
+      document.addEventListener('click', e => { if (!pm.contains(e.target)) set(false); }); }
+    imageFlip();
     document.addEventListener('click', e => {
       if (e.target.closest('[data-close]')) DQ.closeAll();
       const add = e.target.closest('[data-add]');
@@ -180,7 +214,7 @@
       // light that follows the mouse across each section background
       const g = t.closest('[data-glow]');
       if (glowEl && glowEl !== g) glowEl.classList.remove('glowing');
-      if (g) { const r = g.getBoundingClientRect(); g.style.setProperty('--gx', (x - r.left) + 'px'); g.style.setProperty('--gy', (y - r.top) + 'px'); g.classList.add('glowing'); }
+      if (g) { const r = g.getBoundingClientRect(); g.style.setProperty('--gx', ((x - r.left) / r.width * 100) + '%'); g.style.setProperty('--gy', ((y - r.top) / r.height * 100) + '%'); g.classList.add('glowing'); }
       glowEl = g;
       // magnetic buttons
       const m = t.closest(MAG);
@@ -197,7 +231,9 @@
     }, { passive: true });
     document.addEventListener('pointerleave', () => { ring.classList.remove('on'); dot.classList.remove('on'); });
     document.addEventListener('pointerdown', () => ring.classList.add('press')); document.addEventListener('pointerup', () => ring.classList.remove('press'));
-    (function loop() { rx += (x - rx) * .18; ry += (y - ry) * .18; ring.style.transform = `translate(${rx}px, ${ry}px)`; dot.style.transform = `translate(${x}px, ${y}px)`; requestAnimationFrame(loop); })();
+    // big screens zoom the page (html{zoom}); mouse coords are screen px, so convert to CSS px or the ring drifts away from the pointer
+    let Z = 1; const zoomNow = () => { Z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1; }; zoomNow(); addEventListener('resize', zoomNow);
+    (function loop() { rx += (x - rx) * .18; ry += (y - ry) * .18; ring.style.transform = `translate(${rx / Z}px, ${ry / Z}px)`; dot.style.transform = `translate(${x / Z}px, ${y / Z}px)`; requestAnimationFrame(loop); })();
   }
   function openSheet(id) { DQ.closeAll(); $(id).classList.add('on'); document.body.style.overflow = 'hidden'; }
   function renderSearch(q) {
@@ -209,7 +245,8 @@
   /* ---------- data ---------- */
   DQ.byId = id => DQ.products.find(p => p.id === id);
   DQ.liveKinds = () => Object.keys(RC.kinds).filter(k => DQ.products.some(p => RC.kindOf(p) === k && p.images && p.images.length));
-  function syncKinds() { const live = DQ.liveKinds(); document.querySelectorAll('[data-kind]').forEach(el => { if (RC.kinds[el.dataset.kind]) el.hidden = !live.includes(el.dataset.kind); }); }
+  function syncKinds() { const live = DQ.liveKinds(); document.querySelectorAll('[data-kind]').forEach(el => { if (RC.kinds[el.dataset.kind]) el.hidden = !live.includes(el.dataset.kind); });
+    const lp = DQ.livePages(); document.querySelectorAll('[data-page]').forEach(el => { el.hidden = !lp.includes(el.dataset.page); }); document.querySelectorAll('[data-pages]').forEach(el => { el.hidden = !lp.length; }); }
   DQ.load = async () => {
     const [p, s] = await Promise.all([
       sb.from('shop_products').select('*').eq('active', true).order('sort').order('id'),

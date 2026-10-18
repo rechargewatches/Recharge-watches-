@@ -28,8 +28,8 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Archivo:wght@400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/base.css?v=20261017g">
-<link rel="stylesheet" href="assets/store.css?v=20261017g">
+<link rel="stylesheet" href="assets/base.css?v=20261018a">
+<link rel="stylesheet" href="assets/store.css?v=20261018a">
 <style>
 
 /* ---------- desktop landing: scroll through the Q ---------- */
@@ -198,8 +198,8 @@
 <div id="ftr"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="assets/config.js?v=20261017g"></script>
-<script src="assets/app.js?v=20261017g"></script>
+<script src="assets/config.js?v=20261018a"></script>
+<script src="assets/app.js?v=20261018a"></script>
 <script>
 const { discountPct, esc } = RC;
 const $ = s => document.querySelector(s);
@@ -286,6 +286,19 @@ const state = {}; // per section: { tab, all }
     scrollTo({ top: Math.max(0, end + off + (navB - (nav ? nav.offsetHeight * Z : 0))), behavior: smooth ? 'smooth' : 'auto' });
     return true;
   };
+  // scroll-spy: the address bar and the active menu item follow the section on screen (top = home, no hash)
+  let spyT = 0;
+  const spy = () => {
+    const secs = [...document.querySelectorAll('#sections > section.kind[id]')].filter(x => !x.hidden);
+    const nav = document.querySelector('.nav-bar'), line = (nav ? nav.getBoundingClientRect().bottom : 0) + innerHeight * .25;
+    let cur = 'home';
+    if (L.getBoundingClientRect().bottom <= innerHeight + 2) secs.forEach(x => { if (x.getBoundingClientRect().top <= line) cur = x.id; });
+    document.querySelectorAll('.links a[data-kind], .menu-list a[data-kind]').forEach(a => a.classList.toggle('on', a.dataset.kind === cur));
+    const want = cur === 'home' ? location.pathname + location.search : '#' + cur;
+    if ((cur === 'home' ? '' : '#' + cur) !== location.hash) history.replaceState(null, '', want);
+  };
+  addEventListener('scroll', () => { if (spyT) return; spyT = requestAnimationFrame(() => { spyT = 0; spy(); }); }, { passive: true });
+  setTimeout(spy, 1200);
   addEventListener('hashchange', () => { const id = decodeURIComponent(location.hash.slice(1)); if (id) DQ_goto(id); });
   document.addEventListener('click', e => {
     const a = e.target.closest('a[href*="#"]'); if (!a || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey) return;

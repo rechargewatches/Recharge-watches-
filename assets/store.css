@@ -320,3 +320,37 @@ html,body{overflow-x:clip}
 #accSheet .wrap{width:100%;box-sizing:border-box}
 @media (max-width:480px){.actions{gap:4px}.actions .icon-btn{width:36px;height:36px}.actions .icon-btn svg{width:18px;height:18px}}
 @media (max-width:380px){.actions{gap:2px}.actions .icon-btn{width:33px;height:33px}}
+
+/* ---------- pages dropdown (Luxury / Men / Women) ---------- */
+.pg-menu{position:relative;display:flex;align-items:center}
+.pg-menu[hidden]{display:none}
+.pg-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 0;color:var(--muted);font:inherit;transition:color .2s}
+.pg-btn svg{width:14px;height:14px;transition:transform .3s}
+.pg-btn:hover,.pg-btn.on,.pg-menu.open .pg-btn{color:var(--ink)}
+.pg-menu.open .pg-btn svg{transform:rotate(180deg)}
+.pg-drop{position:absolute;top:calc(100% + 14px);right:50%;translate:50% 0;min-width:230px;padding:8px;border-radius:18px;background:var(--nav);border:1px solid var(--line);box-shadow:0 30px 60px -24px rgba(0,0,0,.55);display:grid;gap:4px;opacity:0;visibility:hidden;transform:translateY(-8px);transition:opacity .25s,transform .3s cubic-bezier(.2,.8,.2,1),visibility .25s;z-index:60}
+.pg-drop::before{content:"";position:absolute;inset:-16px 0 auto;height:16px}
+.pg-menu.open .pg-drop{opacity:1;visibility:visible;transform:none}
+.pg-drop a{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:12px 14px;border-radius:12px;color:var(--ink);transition:background .2s}
+.pg-drop a::after{display:none}
+.pg-drop a:hover,.pg-drop a.on{background:rgb(var(--accent-rgb)/.12)}
+.pg-drop a b{font-size:15px;font-weight:700}
+.pg-drop a small{font:600 9px var(--f-ui);letter-spacing:.3em;color:var(--muted)}
+.pg-drop a.lux{background:linear-gradient(120deg,#16100a,#2a1d10);color:#F2E6D0;border:1px solid rgba(201,169,110,.45)}
+.pg-drop a.lux small{color:#C9A96E}
+.pg-drop a.lux:hover{background:linear-gradient(120deg,#1d150c,#3a2814)}
+.pg-drop a[hidden]{display:none}
+.menu-pages{display:grid;gap:2px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.menu-pages[hidden],.menu-pages a[hidden]{display:none}
+.menu-pages small{font:600 10px var(--f-ui);letter-spacing:.4em;color:var(--accent);margin-bottom:6px}
+.menu-pages a.lux{color:#C9A96E}
+
+/* ---------- hover: products with several photos flip through them ---------- */
+.card .ph img:not(.alt){transition:transform .9s cubic-bezier(.2,.7,.2,1),opacity .18s,filter .18s}
+.card .ph img.swap{opacity:.15;filter:blur(3px)}
+.card.flipping .ph img.alt{opacity:0!important}
+.ph-dots{position:absolute;top:14px;left:50%;translate:-50% 0;display:flex;gap:4px;z-index:2;opacity:0;transition:opacity .3s}
+.ph-dots i{width:14px;height:3px;border-radius:2px;background:rgba(255,255,255,.5);box-shadow:0 0 0 .5px rgba(0,0,0,.2);transition:background .3s,width .3s}
+.ph-dots i.on{background:#fff;width:22px}
+.card:hover .ph-dots,.card.flipping .ph-dots{opacity:1}
+@media (hover:none){.ph-dots{opacity:1}}
