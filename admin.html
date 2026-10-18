@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>DAQQA Watches — Admin</title>
+<title>DAQQA — Admin</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#20160E">
 <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Bodoni+Moda:wght@500&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/base.css?v=20261018l">
+<link rel="stylesheet" href="assets/base.css?v=20261018m">
 <script>try{const t=localStorage.getItem('rc-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <style>
 body{font-size:14px}
@@ -225,7 +225,7 @@ main{flex:1;min-width:0;padding:28px 32px 60px}
 <section class="login hidden" id="loginView">
   <form id="loginForm" autocomplete="on">
     <div class="m" id="loginLogo"></div>
-    <h1 class="en">DAQQA WATCHES</h1>
+    <h1 class="en">DAQQA</h1>
     <p>لوحة التحكم — للأدمن فقط</p>
     <div class="field"><label for="em">الإيميل</label><input class="input en" id="em" type="email" autocomplete="username" required dir="ltr"></div>
     <div class="field"><label for="pw">الباسورد</label><input class="input en" id="pw" type="password" autocomplete="current-password" required dir="ltr"></div>
@@ -237,7 +237,7 @@ main{flex:1;min-width:0;padding:28px 32px 60px}
   </form>
   <form id="forgotForm" class="hidden" autocomplete="on">
     <div class="m" id="forgotLogo"></div>
-    <h1 class="en">DAQQA WATCHES</h1>
+    <h1 class="en">DAQQA</h1>
     <p>اكتب إيميل الأدمن وهيوصلك لينك تعمل منه باسورد جديد</p>
     <div class="field"><label for="fem">الإيميل</label><input class="input en" id="fem" type="email" autocomplete="username" required dir="ltr"></div>
     <button class="btn btn-primary" id="forgotBtn" type="submit">ابعت لينك الاسترجاع</button>
@@ -246,7 +246,7 @@ main{flex:1;min-width:0;padding:28px 32px 60px}
   </form>
   <form id="resetForm" class="hidden" autocomplete="on">
     <div class="m" id="resetLogo"></div>
-    <h1 class="en">DAQQA WATCHES</h1>
+    <h1 class="en">DAQQA</h1>
     <p>اكتب الباسورد الجديد</p>
     <div class="field"><label for="npw">الباسورد الجديد (8 حروف على الأقل)</label><input class="input en" id="npw" type="password" minlength="8" autocomplete="new-password" required dir="ltr"></div>
     <div class="field"><label for="npw2">تأكيد الباسورد</label><input class="input en" id="npw2" type="password" minlength="8" autocomplete="new-password" required dir="ltr"></div>
@@ -276,7 +276,7 @@ main{flex:1;min-width:0;padding:28px 32px 60px}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="assets/config.js?v=20261018l"></script>
+<script src="assets/config.js?v=20261018m"></script>
 <script>
 const {money, finalPrice, discountPct, esc, categories, statuses} = RC;
 // read this before the client consumes the link: a password-recovery link lands here with type=recovery
@@ -500,7 +500,7 @@ function renderOrders() {
 }
 function orderHTML(o) {
   const wa = o.phone.replace(/\D/g, '').replace(/^0/, '20');
-  const msg = encodeURIComponent(`أهلاً ${o.customer_name}\nمعاك DAQQA Watches بخصوص طلبك ${o.code} بإجمالي ${money(o.total)}.\nممكن نأكد العنوان: ${o.city} - ${o.address}؟`);
+  const msg = encodeURIComponent(`أهلاً ${o.customer_name}\nمعاك DAQQA بخصوص طلبك ${o.code} بإجمالي ${money(o.total)}.\nممكن نأكد العنوان: ${o.city} - ${o.address}؟`);
   return `<div class="order ${openOrders.has(o.id)?'open':''} ${freshIds.has(o.id)?'fresh':''}" data-oid="${o.id}">
     <div class="o-top" data-toggle>
       <div><div class="code">${esc(o.code)}</div><div class="date">${fmtDate(o.created_at)}</div></div>

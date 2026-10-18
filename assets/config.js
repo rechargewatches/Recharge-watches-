@@ -1,6 +1,6 @@
 // DAQQA Watches — public config (the publishable key is safe in the browser; data is protected by RLS)
 window.RC = {
-  brand: 'DAQQA Watches',
+  brand: 'DAQQA',
   url: 'https://jfcwstqckaebteglgzny.supabase.co',
   key: 'sb_publishable__3yLhn3CWDr6oP7GcPZAxQ_NQY3oBHw',
   bucket: 'shop-images',
